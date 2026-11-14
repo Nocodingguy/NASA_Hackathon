@@ -1,0 +1,1372 @@
+{
+  "type": "FeatureCollection",
+  "metadata": {
+    "generator": "GlacierWatch Downstream Hydrodynamic Inundation & Exposure Model",
+    "crs": "EPSG:4326",
+    "total_features": 22
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              86.44814849125751,
+              27.86204083233713
+            ],
+            [
+              86.41962230335733,
+              27.85964867046421
+            ],
+            [
+              86.39109500882272,
+              27.856241735674995
+            ],
+            [
+              86.36263195641834,
+              27.852424905935436
+            ],
+            [
+              86.3342536351768,
+              27.848088130700845
+            ],
+            [
+              86.30585087752047,
+              27.843741448452636
+            ],
+            [
+              86.2772596074135,
+              27.84068801874836
+            ],
+            [
+              86.24848133600501,
+              27.839251797279882
+            ],
+            [
+              86.21991410753336,
+              27.837820142378636
+            ],
+            [
+              86.19671493737997,
+              27.825567309106116
+            ],
+            [
+              86.19593688901831,
+              27.826731319980002
+            ],
+            [
+              86.21945638604154,
+              27.839153342097926
+            ],
+            [
+              86.24839577195337,
+              27.840603693933947
+            ],
+            [
+              86.27712592575234,
+              27.842037525749568
+            ],
+            [
+              86.30563064267548,
+              27.84508171747119
+            ],
+            [
+              86.33399532570469,
+              27.849422575796922
+            ],
+            [
+              86.36238921610662,
+              27.85376173547736
+            ],
+            [
+              86.39087989992817,
+              27.85758227703094
+            ],
+            [
+              86.41944922124034,
+              27.860994234729127
+            ],
+            [
+              86.44811601990796,
+              27.86339818456073
+            ],
+            [
+              86.47693935384078,
+              27.862076134756055
+            ],
+            [
+              86.47686064657539,
+              27.860723865173348
+            ],
+            [
+              86.44814849125751,
+              27.86204083233713
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "feature_type": "inundation_zone",
+        "lake_id": "tsho_rolpa",
+        "lake_name": "Tsho Rolpa",
+        "river_basin": "Rolwaling Khola & Tama Koshi",
+        "tier": "low",
+        "tier_label": "Tier 1: Minor Breach / Piping Flow",
+        "buffer_width_m": 150,
+        "peak_discharge_m3s": 2400,
+        "color_hex": "#3b82f6",
+        "description": "Controlled spillway overtopping or minor piping; damages riverside paths and small pedestrian footbridges."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              86.43778718419375,
+              27.86104069676021
+            ],
+            [
+              86.39900103702755,
+              27.856412336620508
+            ],
+            [
+              86.3601874156644,
+              27.851273028839614
+            ],
+            [
+              86.321480422317,
+              27.845355533309846
+            ],
+            [
+              86.28258696815959,
+              27.840184734567426
+            ],
+            [
+              86.24338635346862,
+              27.83822839541765
+            ],
+            [
+              86.20724345124073,
+              27.833031575525236
+            ],
+            [
+              86.20534061604276,
+              27.804337017229106
+            ],
+            [
+              86.18671199412294,
+              27.779987914068926
+            ],
+            [
+              86.15442166264783,
+              27.759758070849934
+            ],
+            [
+              86.12361439302337,
+              27.738199548134595
+            ],
+            [
+              86.12160693911493,
+              27.740469710032816
+            ],
+            [
+              86.15248159919852,
+              27.762075668823762
+            ],
+            [
+              86.18435898005187,
+              27.782047154629364
+            ],
+            [
+              86.20215048814076,
+              27.805302900354846
+            ],
+            [
+              86.20415296857645,
+              27.835512957793124
+            ],
+            [
+              86.2430348669698,
+              27.841103983123006
+            ],
+            [
+              86.28225483192689,
+              27.843061352951004
+            ],
+            [
+              86.32096455851547,
+              27.84820772874438
+            ],
+            [
+              86.35967244444232,
+              27.85412537027425
+            ],
+            [
+              86.39854529395926,
+              27.859272540083495
+            ],
+            [
+              86.43762052467012,
+              27.863935377235393
+            ],
+            [
+              86.47695099628952,
+              27.8628436380013
+            ],
+            [
+              86.47684900473183,
+              27.859956361697282
+            ],
+            [
+              86.43778718419375,
+              27.86104069676021
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "feature_type": "inundation_zone",
+        "lake_id": "tsho_rolpa",
+        "lake_name": "Tsho Rolpa",
+        "river_basin": "Rolwaling Khola & Tama Koshi",
+        "tier": "moderate",
+        "tier_label": "Tier 2: Partial Moraine Dam Failure",
+        "buffer_width_m": 320,
+        "peak_discharge_m3s": 6800,
+        "color_hex": "#f59e0b",
+        "description": "50% moraine crest breach; severe bank scour, threatens low-lying bridges and headworks."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              86.43602872124214,
+              27.85937382839928
+            ],
+            [
+              86.39552841965718,
+              27.85454006653858
+            ],
+            [
+              86.35492201207549,
+              27.8490032254669
+            ],
+            [
+              86.31432596101462,
+              27.842794927471026
+            ],
+            [
+              86.27337653227563,
+              27.838279508451702
+            ],
+            [
+              86.23273329579125,
+              27.836248217276808
+            ],
+            [
+              86.20015491665865,
+              27.824419788209507
+            ],
+            [
+              86.20913178755669,
+              27.79217873356952
+            ],
+            [
+              86.17365556476105,
+              27.770094061777026
+            ],
+            [
+              86.14073606576619,
+              27.74834542314347
+            ],
+            [
+              86.10858517771268,
+              27.725838898898726
+            ],
+            [
+              86.07899126337011,
+              27.700884813729278
+            ],
+            [
+              86.0506909690156,
+              27.674474967607146
+            ],
+            [
+              86.02234793491279,
+              27.648006959871637
+            ],
+            [
+              86.0176519800585,
+              27.651992997587957
+            ],
+            [
+              86.04599484946719,
+              27.67846194819064
+            ],
+            [
+              86.07440775632263,
+              27.70497794530082
+            ],
+            [
+              86.10433627309146,
+              27.73021504739658
+            ],
+            [
+              86.13679173374128,
+              27.752935442075383
+            ],
+            [
+              86.16985623904091,
+              27.774780425079125
+            ],
+            [
+              86.20175443676938,
+              27.794638999187576
+            ],
+            [
+              86.19249679464595,
+              27.82787873291959
+            ],
+            [
+              86.23128262861125,
+              27.84196187100914
+            ],
+            [
+              86.27279338489457,
+              27.84403675834886
+            ],
+            [
+              86.31337431514504,
+              27.848511573703068
+            ],
+            [
+              86.35387801539353,
+              27.854705758628274
+            ],
+            [
+              86.39460289128563,
+              27.860258790930914
+            ],
+            [
+              86.43567113497487,
+              27.865160302639616
+            ],
+            [
+              86.4769777732693,
+              27.864287871169793
+            ],
+            [
+              86.47682222953227,
+              27.85851212763811
+            ],
+            [
+              86.43602872124214,
+              27.85937382839928
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "feature_type": "inundation_zone",
+        "lake_id": "tsho_rolpa",
+        "lake_name": "Tsho Rolpa",
+        "river_basin": "Rolwaling Khola & Tama Koshi",
+        "tier": "severe",
+        "tier_label": "Tier 3: Catastrophic Moraine Collapse",
+        "buffer_width_m": 640,
+        "peak_discharge_m3s": 14500,
+        "color_hex": "#ef4444",
+        "description": "Total moraine dam collapse; high-velocity debris wave, severe inundation of downstream villages and hydropower assets."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          86.375,
+          27.855
+        ]
+      },
+      "properties": {
+        "feature_type": "exposed_infrastructure",
+        "lake_id": "tsho_rolpa",
+        "lake_name": "Tsho Rolpa",
+        "asset_id": "na_village",
+        "name": "Na Village",
+        "asset_type": "village",
+        "elevation_m": 4180,
+        "distance_from_lake_km": 10.5,
+        "eta_minutes": 32,
+        "criticality": "HIGH",
+        "threat_tier": "severe",
+        "details": "High-altitude pastoral settlement (~80 residents)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          86.29,
+          27.842
+        ]
+      },
+      "properties": {
+        "feature_type": "exposed_infrastructure",
+        "lake_id": "tsho_rolpa",
+        "lake_name": "Tsho Rolpa",
+        "asset_id": "beding_village",
+        "name": "Beding Village",
+        "asset_type": "village",
+        "elevation_m": 3690,
+        "distance_from_lake_km": 19.2,
+        "eta_minutes": 58,
+        "criticality": "CRITICAL",
+        "threat_tier": "moderate",
+        "details": "Primary Rolwaling Sherpa settlement (~350 residents)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          86.21,
+          27.838
+        ]
+      },
+      "properties": {
+        "feature_type": "exposed_infrastructure",
+        "lake_id": "tsho_rolpa",
+        "lake_name": "Tsho Rolpa",
+        "asset_id": "chetchet_bridge",
+        "name": "Chetchet Suspension Bridge",
+        "asset_type": "bridge",
+        "elevation_m": 2240,
+        "distance_from_lake_km": 28.4,
+        "eta_minutes": 86,
+        "criticality": "HIGH",
+        "threat_tier": "moderate",
+        "details": "Lifeline trail bridge connecting Rolwaling valley"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          86.208,
+          27.795
+        ]
+      },
+      "properties": {
+        "feature_type": "exposed_infrastructure",
+        "lake_id": "tsho_rolpa",
+        "lake_name": "Tsho Rolpa",
+        "asset_id": "upper_tamakoshi_hep",
+        "name": "Upper Tamakoshi Hydropower (456 MW)",
+        "asset_type": "hydropower",
+        "elevation_m": 1980,
+        "distance_from_lake_km": 34.0,
+        "eta_minutes": 103,
+        "criticality": "CRITICAL",
+        "threat_tier": "low",
+        "details": "Nepal's largest operating national grid hydroelectric project; desanding basin & dam headworks at Gonggar"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          86.095,
+          27.72
+        ]
+      },
+      "properties": {
+        "feature_type": "exposed_infrastructure",
+        "lake_id": "tsho_rolpa",
+        "lake_name": "Tsho Rolpa",
+        "asset_id": "singati_bazar",
+        "name": "Singati Commercial Bazaar",
+        "asset_type": "village",
+        "elevation_m": 1250,
+        "distance_from_lake_km": 49.5,
+        "eta_minutes": 150,
+        "criticality": "CRITICAL",
+        "threat_tier": "low",
+        "details": "Major regional economic hub and transport transit point"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              86.9059324345882,
+              27.89811502446236
+            ],
+            [
+              86.88692084057388,
+              27.898303958988905
+            ],
+            [
+              86.8680506021998,
+              27.896400964581897
+            ],
+            [
+              86.84915382644607,
+              27.894261708193568
+            ],
+            [
+              86.83034362225146,
+              27.891912530184936
+            ],
+            [
+              86.81195657650564,
+              27.887611071997288
+            ],
+            [
+              86.79363690765553,
+              27.883322599846412
+            ],
+            [
+              86.77816342090782,
+              27.874849410008757
+            ],
+            [
+              86.76492416044503,
+              27.862870052038932
+            ],
+            [
+              86.75424031907103,
+              27.848930762516222
+            ],
+            [
+              86.75298119330162,
+              27.84969306826562
+            ],
+            [
+              86.76374162218423,
+              27.863732477793107
+            ],
+            [
+              86.77720614170973,
+              27.87591576285284
+            ],
+            [
+              86.79302993946123,
+              27.884580812102385
+            ],
+            [
+              86.8115684208014,
+              27.88892052707396
+            ],
+            [
+              86.8300424743363,
+              27.893242337100784
+            ],
+            [
+              86.84895141831872,
+              27.89560385332878
+            ],
+            [
+              86.8678683176203,
+              27.897745388696258
+            ],
+            [
+              86.8868431126243,
+              27.89965892203042
+            ],
+            [
+              86.90594960100997,
+              27.899469051698002
+            ],
+            [
+              86.9250087018594,
+              27.899277012669003
+            ],
+            [
+              86.92499129823851,
+              27.89792298726413
+            ],
+            [
+              86.9059324345882,
+              27.89811502446236
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "feature_type": "inundation_zone",
+        "lake_id": "imja_tsho",
+        "lake_name": "Imja Tsho (Everest Region)",
+        "river_basin": "Imja Khola & Dudh Koshi",
+        "tier": "low",
+        "tier_label": "Tier 1: Minor Breach / Piping Flow",
+        "buffer_width_m": 150,
+        "peak_discharge_m3s": 2400,
+        "color_hex": "#3b82f6",
+        "description": "Controlled spillway overtopping or minor piping; damages riverside paths and small pedestrian footbridges."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              86.89646058339959,
+              27.897442103551544
+            ],
+            [
+              86.86812053963538,
+              27.895635350325293
+            ],
+            [
+              86.83988228016538,
+              27.892437572904427
+            ],
+            [
+              86.81216205510043,
+              27.886865233562418
+            ],
+            [
+              86.78521827965614,
+              27.88013634776428
+            ],
+            [
+              86.76559512507015,
+              27.862382124951452
+            ],
+            [
+              86.74963007656758,
+              27.841483076742747
+            ],
+            [
+              86.73370565758184,
+              27.820491092343097
+            ],
+            [
+              86.72086834049517,
+              27.798782402149875
+            ],
+            [
+              86.71779307245771,
+              27.773805061193563
+            ],
+            [
+              86.71456454962076,
+              27.774119434447147
+            ],
+            [
+              86.71770615784756,
+              27.799641594562434
+            ],
+            [
+              86.7309124184756,
+              27.82197526677725
+            ],
+            [
+              86.74693851451414,
+              27.84310200271018
+            ],
+            [
+              86.76307064096527,
+              27.864220395667196
+            ],
+            [
+              86.78350537897266,
+              27.882709169715017
+            ],
+            [
+              86.81136293417609,
+              27.889666364362714
+            ],
+            [
+              86.83931668835216,
+              27.895285648647665
+            ],
+            [
+              86.86779837698927,
+              27.89851100257969
+            ],
+            [
+              86.89636242417383,
+              27.900332033714285
+            ],
+            [
+              86.92501856408505,
+              27.900044293613032
+            ],
+            [
+              86.92498143636047,
+              27.897155706082646
+            ],
+            [
+              86.89646058339959,
+              27.897442103551544
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "feature_type": "inundation_zone",
+        "lake_id": "imja_tsho",
+        "lake_name": "Imja Tsho (Everest Region)",
+        "river_basin": "Imja Khola & Dudh Koshi",
+        "tier": "moderate",
+        "tier_label": "Tier 2: Partial Moraine Dam Failure",
+        "buffer_width_m": 320,
+        "peak_discharge_m3s": 6800,
+        "color_hex": "#f59e0b",
+        "description": "50% moraine crest breach; severe bank scour, threatens low-lying bridges and headworks."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              86.893364636749,
+              27.896028359611375
+            ],
+            [
+              86.86202290836127,
+              27.893488886627793
+            ],
+            [
+              86.83082742533388,
+              27.88973862621292
+            ],
+            [
+              86.80075412404925,
+              27.88270181233314
+            ],
+            [
+              86.77541642496948,
+              27.86915141825955
+            ],
+            [
+              86.75623618896805,
+              27.847605648165985
+            ],
+            [
+              86.7385980856419,
+              27.824358054313745
+            ],
+            [
+              86.72278407001195,
+              27.80106987605087
+            ],
+            [
+              86.71940732717694,
+              27.77364784623365
+            ],
+            [
+              86.71598939964383,
+              27.745877691267943
+            ],
+            [
+              86.7187560586218,
+              27.71827363060492
+            ],
+            [
+              86.72321294439624,
+              27.690407103118304
+            ],
+            [
+              86.71678708012101,
+              27.689592822506484
+            ],
+            [
+              86.71230457097145,
+              27.717609271448037
+            ],
+            [
+              86.70946381575745,
+              27.745935835302877
+            ],
+            [
+              86.71295028150604,
+              27.774276592740065
+            ],
+            [
+              86.71648132214212,
+              27.80296510334285
+            ],
+            [
+              86.73311898361791,
+              27.82746830262743
+            ],
+            [
+              86.75098524579842,
+              27.85101813463281
+            ],
+            [
+              86.77105113577593,
+              27.873559794539467
+            ],
+            [
+              86.79819838481096,
+              27.888078195727378
+            ],
+            [
+              86.82955863961723,
+              27.895416237074542
+            ],
+            [
+              86.86129126671847,
+              27.899231109828076
+            ],
+            [
+              86.89310534977545,
+              27.90180883755682
+            ],
+            [
+              86.92503712861564,
+              27.901488586921744
+            ],
+            [
+              86.9249628731664,
+              27.895711411860994
+            ],
+            [
+              86.893364636749,
+              27.896028359611375
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "feature_type": "inundation_zone",
+        "lake_id": "imja_tsho",
+        "lake_name": "Imja Tsho (Everest Region)",
+        "river_basin": "Imja Khola & Dudh Koshi",
+        "tier": "severe",
+        "tier_label": "Tier 3: Catastrophic Moraine Collapse",
+        "buffer_width_m": 640,
+        "peak_discharge_m3s": 14500,
+        "color_hex": "#ef4444",
+        "description": "Total moraine dam collapse; high-velocity debris wave, severe inundation of downstream villages and hydropower assets."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          86.832,
+          27.893
+        ]
+      },
+      "properties": {
+        "feature_type": "exposed_infrastructure",
+        "lake_id": "imja_tsho",
+        "lake_name": "Imja Tsho (Everest Region)",
+        "asset_id": "dingboche_village",
+        "name": "Dingboche Village",
+        "asset_type": "village",
+        "elevation_m": 4410,
+        "distance_from_lake_km": 9.8,
+        "eta_minutes": 30,
+        "criticality": "HIGH",
+        "threat_tier": "severe",
+        "details": "Key Everest acclimatization hub and lodges (~400 tourists/residents)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          86.785,
+          27.882
+        ]
+      },
+      "properties": {
+        "feature_type": "exposed_infrastructure",
+        "lake_id": "imja_tsho",
+        "lake_name": "Imja Tsho (Everest Region)",
+        "asset_id": "pangboche_village",
+        "name": "Pangboche Historic Village",
+        "asset_type": "village",
+        "elevation_m": 3985,
+        "distance_from_lake_km": 15.2,
+        "eta_minutes": 46,
+        "criticality": "HIGH",
+        "threat_tier": "moderate",
+        "details": "Oldest monastery in Khumbu and residential village"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          86.764,
+          27.863
+        ]
+      },
+      "properties": {
+        "feature_type": "exposed_infrastructure",
+        "lake_id": "imja_tsho",
+        "lake_name": "Imja Tsho (Everest Region)",
+        "asset_id": "phunki_tenga_bridge",
+        "name": "Phunki Tenga River Crossing",
+        "asset_type": "bridge",
+        "elevation_m": 3250,
+        "distance_from_lake_km": 20.6,
+        "eta_minutes": 62,
+        "criticality": "HIGH",
+        "threat_tier": "moderate",
+        "details": "Major trekking bridge at Dudh Koshi-Imja Khola confluence"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          86.72,
+          27.805
+        ]
+      },
+      "properties": {
+        "feature_type": "exposed_infrastructure",
+        "lake_id": "imja_tsho",
+        "lake_name": "Imja Tsho (Everest Region)",
+        "asset_id": "larja_bridge",
+        "name": "Hillary Suspension Bridge (Larja)",
+        "asset_type": "bridge",
+        "elevation_m": 2830,
+        "distance_from_lake_km": 29.5,
+        "eta_minutes": 89,
+        "criticality": "CRITICAL",
+        "threat_tier": "moderate",
+        "details": "Twin suspension bridges below Namche Bazaar"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          86.712,
+          27.74
+        ]
+      },
+      "properties": {
+        "feature_type": "exposed_infrastructure",
+        "lake_id": "imja_tsho",
+        "lake_name": "Imja Tsho (Everest Region)",
+        "asset_id": "phakding_settlement",
+        "name": "Phakding Riverfront Settlement",
+        "asset_type": "village",
+        "elevation_m": 2610,
+        "distance_from_lake_km": 37.0,
+        "eta_minutes": 112,
+        "criticality": "CRITICAL",
+        "threat_tier": "low",
+        "details": "Direct riverbank lodges on Everest Base Camp trail"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              84.4602384996466,
+              28.474370599388084
+            ],
+            [
+              84.44670465528728,
+              28.468094106234116
+            ],
+            [
+              84.4184777251826,
+              28.458013970122092
+            ],
+            [
+              84.40814307312172,
+              28.45080696989344
+            ],
+            [
+              84.40616885837996,
+              28.437646046924314
+            ],
+            [
+              84.40122095663864,
+              28.42487592727974
+            ],
+            [
+              84.38983899046475,
+              28.399838337495595
+            ],
+            [
+              84.38841929368847,
+              28.400342823336246
+            ],
+            [
+              84.39978604854983,
+              28.425347718015956
+            ],
+            [
+              84.4046715267225,
+              28.43795719368837
+            ],
+            [
+              84.4067071850549,
+              28.451528967186064
+            ],
+            [
+              84.41770116847871,
+              28.459195846391303
+            ],
+            [
+              84.44606051253334,
+              28.469323348916983
+            ],
+            [
+              84.45950386627526,
+              28.47555790338023
+            ],
+            [
+              84.4860214190838,
+              28.488888023486044
+            ],
+            [
+              84.48677857653644,
+              28.487711975147505
+            ],
+            [
+              84.4602384996466,
+              28.474370599388084
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "feature_type": "inundation_zone",
+        "lake_id": "thulagi_lake",
+        "lake_name": "Thulagi Lake",
+        "river_basin": "Dona Khola & Marsyangdi River",
+        "tier": "low",
+        "tier_label": "Tier 1: Minor Breach / Piping Flow",
+        "buffer_width_m": 150,
+        "peak_discharge_m3s": 2400,
+        "color_hex": "#3b82f6",
+        "description": "Controlled spillway overtopping or minor piping; damages riverside paths and small pedestrian footbridges."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              84.46729436818289,
+              28.477036198520366
+            ],
+            [
+              84.44707830438382,
+              28.46740061845329
+            ],
+            [
+              84.42591229338711,
+              28.459842751653042
+            ],
+            [
+              84.40890371406901,
+              28.450288657628445
+            ],
+            [
+              84.40492437233061,
+              28.43096459786124
+            ],
+            [
+              84.38785072113355,
+              28.393407396200093
+            ],
+            [
+              84.38322060201776,
+              28.37489444008418
+            ],
+            [
+              84.39484733745931,
+              28.336136909410772
+            ],
+            [
+              84.39169428809932,
+              28.335396737623064
+            ],
+            [
+              84.37986290955432,
+              28.37483233839205
+            ],
+            [
+              84.3847219179145,
+              28.394262915532153
+            ],
+            [
+              84.40177135014126,
+              28.4317694399503
+            ],
+            [
+              84.40594652500961,
+              28.452047265790313
+            ],
+            [
+              84.42441206694161,
+              28.462420012634713
+            ],
+            [
+              84.44568684920418,
+              28.4700168328602
+            ],
+            [
+              84.46571108477323,
+              28.479561070356493
+            ],
+            [
+              84.48559235541721,
+              28.489554448451578
+            ],
+            [
+              84.48720762464993,
+              28.48704554532955
+            ],
+            [
+              84.46729436818289,
+              28.477036198520366
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "feature_type": "inundation_zone",
+        "lake_id": "thulagi_lake",
+        "lake_name": "Thulagi Lake",
+        "river_basin": "Dona Khola & Marsyangdi River",
+        "tier": "moderate",
+        "tier_label": "Tier 2: Partial Moraine Dam Failure",
+        "buffer_width_m": 320,
+        "peak_discharge_m3s": 6800,
+        "color_hex": "#f59e0b",
+        "description": "50% moraine crest breach; severe bank scour, threatens low-lying bridges and headworks."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              84.46380513143045,
+              28.473621397854522
+            ],
+            [
+              84.43870624911798,
+              28.4628551740528
+            ],
+            [
+              84.4143707536345,
+              28.45416314969887
+            ],
+            [
+              84.40773655402855,
+              28.43327920370969
+            ],
+            [
+              84.39732764418207,
+              28.41038759097525
+            ],
+            [
+              84.38723454343742,
+              28.3881812789501
+            ],
+            [
+              84.38764224642256,
+              28.365784921543273
+            ],
+            [
+              84.39465632406878,
+              28.342401541689707
+            ],
+            [
+              84.40121065604433,
+              28.318525852102532
+            ],
+            [
+              84.40720211466778,
+              28.294560414913697
+            ],
+            [
+              84.41318325206441,
+              28.27062330185255
+            ],
+            [
+              84.40681679097884,
+              28.269376626261227
+            ],
+            [
+              84.40083434422004,
+              28.293313374708088
+            ],
+            [
+              84.39485599964513,
+              28.317220770600898
+            ],
+            [
+              84.38833232974217,
+              28.34097972552236
+            ],
+            [
+              84.38112989442082,
+              28.36498621678215
+            ],
+            [
+              84.38068665415634,
+              28.38925277031009
+            ],
+            [
+              84.39126968921771,
+              28.41254025523355
+            ],
+            [
+              84.40154511840667,
+              28.435141299635543
+            ],
+            [
+              84.40894913640965,
+              28.458452411153015
+            ],
+            [
+              84.43605287123617,
+              28.468133767162957
+            ],
+            [
+              84.46076000744438,
+              28.478732160320547
+            ],
+            [
+              84.48478469089991,
+              28.490808890683557
+            ],
+            [
+              84.4880152293686,
+              28.485791084441004
+            ],
+            [
+              84.46380513143045,
+              28.473621397854522
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "feature_type": "inundation_zone",
+        "lake_id": "thulagi_lake",
+        "lake_name": "Thulagi Lake",
+        "river_basin": "Dona Khola & Marsyangdi River",
+        "tier": "severe",
+        "tier_label": "Tier 3: Catastrophic Moraine Collapse",
+        "buffer_width_m": 640,
+        "peak_discharge_m3s": 14500,
+        "color_hex": "#ef4444",
+        "description": "Total moraine dam collapse; high-velocity debris wave, severe inundation of downstream villages and hydropower assets."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          84.405,
+          28.435
+        ]
+      },
+      "properties": {
+        "feature_type": "exposed_infrastructure",
+        "lake_id": "thulagi_lake",
+        "lake_name": "Thulagi Lake",
+        "asset_id": "dharapani_village",
+        "name": "Dharapani Village & Confluence",
+        "asset_type": "village",
+        "elevation_m": 1860,
+        "distance_from_lake_km": 11.2,
+        "eta_minutes": 34,
+        "criticality": "CRITICAL",
+        "threat_tier": "severe",
+        "details": "Annapurna Circuit checkpoint & police post"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          84.38,
+          28.38
+        ]
+      },
+      "properties": {
+        "feature_type": "exposed_infrastructure",
+        "lake_id": "thulagi_lake",
+        "lake_name": "Thulagi Lake",
+        "asset_id": "tal_village",
+        "name": "Tal Lakeside Settlement",
+        "asset_type": "village",
+        "elevation_m": 1700,
+        "distance_from_lake_km": 19.5,
+        "eta_minutes": 59,
+        "criticality": "CRITICAL",
+        "threat_tier": "moderate",
+        "details": "Low-lying valley basin repeatedly flooded by historic monsoon surges"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          84.41,
+          28.27
+        ]
+      },
+      "properties": {
+        "feature_type": "exposed_infrastructure",
+        "lake_id": "thulagi_lake",
+        "lake_name": "Thulagi Lake",
+        "asset_id": "upper_marsyangdi_hep",
+        "name": "Upper Marsyangdi A Hydropower (50 MW)",
+        "asset_type": "hydropower",
+        "elevation_m": 1300,
+        "distance_from_lake_km": 33.8,
+        "eta_minutes": 102,
+        "criticality": "HIGH",
+        "threat_tier": "low",
+        "details": "Run-of-the-river power station infrastructure"
+      }
+    }
+  ]
+}
