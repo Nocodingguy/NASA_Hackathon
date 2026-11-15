@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { MapRef } from 'react-map-gl/mapbox'
-import type { Feature, Polygon } from 'geojson'
+import type { Feature, Polygon, Position } from 'geojson'
 import MapView from './components/MapView'
 import Scrubber from './components/Scrubber'
 import ActionCard from './components/ActionCard'
@@ -8,19 +8,30 @@ import Credits from './components/Credits'
 import Detective from './detective/Detective'
 import { useTimeline } from './hooks/useTimeline'
 import { useScenario, useSmooth } from './hooks/useScenario'
-import { loadExposure, loadFloods, loadLakes } from './lib/api'
+import { loadExposure, loadLakes, loadPaths } from './lib/api'
 import { YEAR_MAX, YEAR_MIN } from './lib/demoData'
-import { centroid, inPolygon, mainAxis, scalePolygon } from './lib/geo'
+import { bufferLine, catmullRom, centroid, cumulativeKm, projectOnLine, scalePolygon, sliceLine } from './lib/geo'
 import { lakeAt } from './lib/timeline'
-import type { ExposureFeature, FloodFeature, LakeFeature } from './types'
+import type { ExposureFeature, LakeFeature } from './types'
 
-const K_ACROSS = 0.4, K_ALONG = 0.15
+const RATIO_MIN = 0.85
+const RATIO_MAX = 3.2
+const REACH_MIN_FRAC = 0.2
+const RATIO_FULL = 2.6
+const RATIO_START = 0.9
+const BASE_HALF_WIDTH_M = 90
+const WIDEN_M_PER_KM = 7
+
+function reachFraction(ratio: number): number {
+  const f = Math.min(1, Math.max(0, (ratio - RATIO_START) / (RATIO_FULL - RATIO_START)))
+  return REACH_MIN_FRAC + (1 - REACH_MIN_FRAC) * f
+}
 
 export default function App() {
   const mapRef = useRef<MapRef>(null)
   const [lakeId, setLakeId] = useState('')
   const [lakes, setLakes] = useState<LakeFeature[]>([])
-  const [floods, setFloods] = useState<FloodFeature[]>([])
+  const [paths, setPaths] = useState<Record<string, Position[]>>({})
   const [exposure, setExposure] = useState<ExposureFeature[]>([])
   const [deltaC, setDeltaC] = useState(1.5)
   const [years, setYears] = useState(30)
@@ -60,7 +71,7 @@ export default function App() {
   const tl = useTimeline(yMin, yMax)
   useEffect(() => { tl.setT(yMax) }, [yMax, lakeId])
 
-  useEffect(() => { loadLakes().then(c => setLakes(c.features)); loadFloods().then(setFloods); loadExposure().then(setExposure) }, [])
+  useEffect(() => { loadLakes().then(c => setLakes(c.features)); loadPaths().then(setPaths); loadExposure().then(setExposure) }, [])
   useEffect(() => { if (!lakeId && lakeList.length) setLakeId(lakeList[0].id) }, [lakeList, lakeId])
   useEffect(() => { console.log('lakes in data:', lakeList.map(l => l.id)) }, [lakeList])
 
@@ -68,22 +79,35 @@ export default function App() {
   const { now, rings, areaKm2 } = useMemo(() => lakeAt(lakes, lakeId, tl.t), [lakes, lakeId, tl.t])
 
   const q0 = sim.baseQ, q1 = sim.data?.peak_discharge_m3s
-  const ratio = useSmooth(q0 && q1 ? q1 / q0 : 1 + 0.12 * deltaC)
+  const rawRatio = q0 && q1 ? q1 / q0 : 1 + 0.18 * deltaC * Math.sqrt(years / 25)
+  const ratio = useSmooth(Math.min(RATIO_MAX, Math.max(RATIO_MIN, rawRatio)))
 
-  const floodBase = useMemo(() => {
-    const c = floods.filter(f => f.properties.lake_id === lakeId)
-    return c.find(f => f.properties.tier === 'Moderate') ?? c[0]
-  }, [floods, lakeId])
+  const river = useMemo(() => {
+    const origin = lakeList.find(l => l.id === lakeId)?.center
+    let raw = paths[lakeId]
+    if (!raw || raw.length < 2) {
+      const pts = exposure
+        .filter(e => e.properties.lake_id === lakeId)
+        .sort((x, y) => (x.properties.eta_minutes ?? x.properties.distance_km ?? 0) - (y.properties.eta_minutes ?? y.properties.distance_km ?? 0))
+        .map(e => e.geometry.coordinates)
+      raw = origin ? [origin, ...pts] : pts
+    }
+    if (raw.length < 2) return null
+    const line = catmullRom(raw)
+    const cum = cumulativeKm(line)
+    return { line, cum, total: cum[cum.length - 1] }
+  }, [paths, exposure, lakeId, lakeList])
+
+  const reachKm = river ? river.total * reachFraction(ratio) : 0
 
   const flood = useMemo<Feature<Polygon> | null>(() => {
-    if (!floodBase) return null
-    const o = floodBase.properties.origin ?? lakeList.find(l => l.id === lakeId)?.center
-    if (!o) return null
-    return {
-      type: 'Feature', properties: {},
-      geometry: scalePolygon(floodBase.geometry, o, Math.pow(ratio, K_ALONG), Math.pow(ratio, K_ACROSS), mainAxis(floodBase.geometry, o))
-    }
-  }, [floodBase, ratio, lakeList, lakeId])
+    if (!river) return null
+    const { pts, km } = sliceLine(river.line, river.cum, reachKm)
+    if (pts.length < 2) return null
+    const widthScale = Math.pow(ratio, 0.6)
+    const halfW = km.map(k => (BASE_HALF_WIDTH_M + WIDEN_M_PER_KM * k) * widthScale)
+    return { type: 'Feature', properties: { ratio }, geometry: bufferLine(pts, halfW) }
+  }, [river, reachKm, ratio])
 
   const scenarioLake = useMemo<Feature<Polygon> | null>(() => {
     const latest = lakes.filter(f => f.properties.lake_id === lakeId).sort((a, b) => b.properties.year - a.properties.year)[0]
@@ -92,12 +116,34 @@ export default function App() {
     return { type: 'Feature', properties: {}, geometry: scalePolygon(latest.geometry, centroid(latest.geometry), k, k) }
   }, [lakes, lakeId, sim.data, deltaC])
 
-  const exposureState = useMemo(() => exposure.filter(e => e.properties.lake_id === lakeId)
-    .map(feature => ({
-      feature,
-      exposed: !!flood && (inPolygon(feature.geometry.coordinates, flood.geometry) ||
-        (!!floodBase && inPolygon(feature.geometry.coordinates, floodBase.geometry))),
-    })), [exposure, lakeId, flood, floodBase])
+  const exposureState = useMemo(() => {
+    return exposure
+      .filter(e => e.properties.lake_id === lakeId)
+      .map(feature => {
+        const exposed = !!river && projectOnLine(feature.geometry.coordinates, river.line, river.cum).along <= reachKm
+        return { feature, exposed }
+      })
+  }, [exposure, lakeId, river, reachKm])
+
+  const dynamicEtaRows = useMemo(() => {
+    const rows = exposureState
+      .filter(e => e.exposed)
+      .map(({ feature: f }) => {
+        const p = f.properties
+        return {
+          name: p.name,
+          asset_type: p.kind,
+          eta_minutes: p.eta_minutes ?? null,
+          distance_km: p.distance_km ?? null,
+          criticality: (p.criticality ?? 'MEDIUM').toUpperCase(),
+        }
+      })
+      .sort((a, b) => (a.eta_minutes ?? 1e9) - (b.eta_minutes ?? 1e9))
+    if (!rows.length && sim.data?.risk_detail?.eta_table?.length) {
+      return sim.data.risk_detail.eta_table
+    }
+    return rows
+  }, [exposureState, sim.data])
 
   const lakeName = lakeList.find(l => l.id === lakeId)?.label ?? ''
   const observedArea = useMemo(() => lakes.filter(f => f.properties.lake_id === lakeId).sort((x, y) => y.properties.year - x.properties.year)[0]?.properties.area_km2 ?? null, [lakes, lakeId])
@@ -124,7 +170,9 @@ export default function App() {
       </div>
 
       <ActionCard lakeName={lakeName} deltaC={deltaC} years={years} onDelta={setDeltaC} onYears={setYears} sim={sim.data} baseQ={sim.baseQ}
-        observedAreaKm2={observedArea} loading={sim.loading} error={sim.error} exposedCount={exposureState.filter(e => e.exposed).length} />
+        observedAreaKm2={observedArea} loading={sim.loading} error={sim.error}
+        exposedCount={exposureState.filter(e => e.exposed).length}
+        etaRows={dynamicEtaRows} />
       <Scrubber t={tl.t} min={yMin} max={yMax} playing={tl.playing} areaKm2={areaKm2} onChange={tl.setT} onToggle={tl.toggle} />
 
       {detectiveOpen && <Detective lakes={lakes} onOpenMap={openOnMap} onClose={() => setDetectiveOpen(false)} />}

@@ -2,7 +2,6 @@ import type { Polygon, Position } from 'geojson'
 
 const M_PER_DEG = 111_320
 
-/** Scale a polygon about `origin` in a local metric frame. Along/across axes are rotated by `axisRad`. */
 export function scalePolygon(poly: Polygon, origin: Position, kAlong: number, kAcross: number, axisRad = 0): Polygon {
   const cosLat = Math.cos((origin[1] * Math.PI) / 180)
   const [c, s] = [Math.cos(axisRad), Math.sin(axisRad)]
@@ -14,7 +13,6 @@ export function scalePolygon(poly: Polygon, origin: Position, kAlong: number, kA
   return { type: 'Polygon', coordinates: poly.coordinates.map(ring) }
 }
 
-/** Direction (radians) from origin to its farthest vertex: the polygon's main flow axis. */
 export function mainAxis(poly: Polygon, origin: Position): number {
   const cosLat = Math.cos((origin[1] * Math.PI) / 180)
   let best = 0, ang = 0
@@ -32,7 +30,6 @@ export function centroid(poly: Polygon): Position {
   return [x / n, y / n]
 }
 
-/** Ray-casting point-in-polygon (outer ring; holes ignored). */
 export function inPolygon(pt: Position, poly: Polygon): boolean {
   const r = poly.coordinates[0]
   let inside = false
@@ -53,7 +50,6 @@ export function ellipse(center: Position, aKm: number, bKm: number, n = 48): Pol
   return { type: 'Polygon', coordinates: [ring] }
 }
 
-/** Buffer a polyline into a tapered polygon (half-widths in metres, one per vertex). */
 export function bufferLine(line: Position[], halfW: number[]): Polygon {
   const left: Position[] = [], right: Position[] = []
   line.forEach((p, i) => {
@@ -68,7 +64,6 @@ export function bufferLine(line: Position[], halfW: number[]): Polygon {
   return { type: 'Polygon', coordinates: [[...ring, ring[0]]] }
 }
 
-/** Douglas-Peucker: drop vertices closer than `tol` degrees (~0.0001 ≈ 11 m) to the simplified line. */
 function dp(pts: Position[], tol: number): Position[] {
   if (pts.length < 3) return pts
   const [a, b] = [pts[0], pts[pts.length - 1]]
@@ -81,7 +76,6 @@ function dp(pts: Position[], tol: number): Position[] {
   return maxD > tol ? [...dp(pts.slice(0, idx + 1), tol).slice(0, -1), ...dp(pts.slice(idx), tol)] : [a, b]
 }
 
-/** Chaikin corner-cutting: rounds the remaining corners. */
 function chaikin(ring: Position[], iterations: number): Position[] {
   let pts = ring.slice(0, -1)
   for (let k = 0; k < iterations; k++) {
@@ -102,4 +96,60 @@ export function smoothPolygon(p: Polygon, tol = 0.0001, iterations = 2): Polygon
       return s.length < 4 ? r : chaikin([...s, s[0]], iterations)
     })
   }
+}
+
+const KM_PER_DEG = 111.32
+
+const segKm = (a: Position, b: Position): number => {
+  const cosLat = Math.cos((((a[1] + b[1]) / 2) * Math.PI) / 180)
+  return Math.hypot((b[0] - a[0]) * cosLat, b[1] - a[1]) * KM_PER_DEG
+}
+
+export function catmullRom(pts: Position[], samples = 14): Position[] {
+  if (pts.length < 3) return pts
+  const out: Position[] = []
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[Math.max(i - 1, 0)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(i + 2, pts.length - 1)]
+    for (let k = 0; k < samples; k++) {
+      const t = k / samples, t2 = t * t, t3 = t2 * t
+      const f = (a: number, b: number, c: number, d: number) =>
+        0.5 * (2 * b + (-a + c) * t + (2 * a - 5 * b + 4 * c - d) * t2 + (-a + 3 * b - 3 * c + d) * t3)
+      out.push([f(p0[0], p1[0], p2[0], p3[0]), f(p0[1], p1[1], p2[1], p3[1])])
+    }
+  }
+  out.push(pts[pts.length - 1])
+  return out
+}
+
+export function cumulativeKm(line: Position[]): number[] {
+  const cum = [0]
+  for (let i = 1; i < line.length; i++) cum.push(cum[i - 1] + segKm(line[i - 1], line[i]))
+  return cum
+}
+
+export function projectOnLine(pt: Position, line: Position[], cum: number[]): { along: number; off: number } {
+  let best = { along: 0, off: Infinity }
+  for (let i = 0; i < line.length - 1; i++) {
+    const a = line[i], b = line[i + 1]
+    const cosLat = Math.cos((pt[1] * Math.PI) / 180)
+    const ax = (a[0] - pt[0]) * cosLat, ay = a[1] - pt[1]
+    const dx = (b[0] - a[0]) * cosLat, dy = b[1] - a[1]
+    const len2 = dx * dx + dy * dy
+    const t = len2 ? Math.max(0, Math.min(1, -(ax * dx + ay * dy) / len2)) : 0
+    const off = Math.hypot(ax + t * dx, ay + t * dy) * KM_PER_DEG
+    if (off < best.off) best = { along: cum[i] + t * (cum[i + 1] - cum[i]), off }
+  }
+  return best
+}
+
+export function sliceLine(line: Position[], cum: number[], km: number): { pts: Position[]; km: number[] } {
+  const pts: Position[] = [], kms: number[] = []
+  for (let i = 0; i < line.length; i++) {
+    if (cum[i] <= km) { pts.push(line[i]); kms.push(cum[i]); continue }
+    const t = (km - cum[i - 1]) / (cum[i] - cum[i - 1])
+    pts.push([line[i - 1][0] + t * (line[i][0] - line[i - 1][0]), line[i - 1][1] + t * (line[i][1] - line[i - 1][1])])
+    kms.push(km)
+    break
+  }
+  return { pts, km: kms }
 }

@@ -1,11 +1,4 @@
-#!/usr/bin/env python3
-"""
-Member 1: Downstream GLOF Inundation & Exposure Extraction Pipeline
-Generates 3 downstream flood-zone tiers (Low, Moderate, Severe breach)
-and maps exposed infrastructure (villages, hydropower, bridges) with flood ETAs.
 
-Outputs: backend/data/flood_zones.geojson
-"""
 
 import json
 from pathlib import Path
@@ -17,31 +10,26 @@ from shapely.ops import transform
 import pyproj
 
 WGS84_CRS = "EPSG:4326"
-UTM_CRS = "EPSG:32645"  # UTM Zone 45N (meters)
+UTM_CRS = "EPSG:32645"
 
-# Projector for buffering in meters then back to lon/lat
 project_to_utm = pyproj.Transformer.from_crs(WGS84_CRS, UTM_CRS, always_xy=True).transform
 project_to_wgs84 = pyproj.Transformer.from_crs(UTM_CRS, WGS84_CRS, always_xy=True).transform
 
-# Downstream Drainage Thalwegs (River Paths through the steep Himalayan valleys)
-# 1. Tsho Rolpa -> Rolwaling Khola -> Tama Koshi River past Upper Tamakoshi Hydropower
-# 2. Imja Tsho -> Imja Khola -> Dudh Koshi River past Dingboche, Tengboche, Phakding
-# 3. Thulagi Lake -> Dona Khola -> Marsyangdi River past Dharapani, Tal, Chamje
 LAKE_DRAINAGE_CORRIDORS = {
     "tsho_rolpa": {
         "lake_name": "Tsho Rolpa",
         "river_name": "Rolwaling Khola & Tama Koshi",
         "path_coords": [
-            [86.4769, 27.8614], # Dam crest / moraine
-            [86.4420, 27.8630], # Upper Rolwaling
-            [86.3750, 27.8550], # Na Village
-            [86.2900, 27.8420], # Beding Village
-            [86.2100, 27.8380], # Chetchet gorge
-            [86.1950, 27.8250], # Simigaun base
-            [86.2080, 27.7950], # Gonggar / Upper Tamakoshi Dam site
-            [86.1550, 27.7620], # Jagat
-            [86.0950, 27.7200], # Singati Bazar
-            [86.0200, 27.6500], # Tama Koshi downstream
+            [86.4769, 27.8614],
+            [86.4420, 27.8630],
+            [86.3750, 27.8550],
+            [86.2900, 27.8420],
+            [86.2100, 27.8380],
+            [86.1950, 27.8250],
+            [86.2080, 27.7950],
+            [86.1550, 27.7620],
+            [86.0950, 27.7200],
+            [86.0200, 27.6500],
         ],
         "exposed_assets": [
             {
@@ -105,14 +93,14 @@ LAKE_DRAINAGE_CORRIDORS = {
         "lake_name": "Imja Tsho (Everest Region)",
         "river_name": "Imja Khola & Dudh Koshi",
         "path_coords": [
-            [86.9250, 27.8986], # Imja Moraine
-            [86.8850, 27.8990], # Chukhung valley
-            [86.8320, 27.8930], # Dingboche
-            [86.7850, 27.8820], # Pangboche
-            [86.7640, 27.8630], # Tengboche base / Phunki Tenga
-            [86.7200, 27.8050], # Larja suspension bridge (Namche junction)
-            [86.7120, 27.7400], # Phakding village
-            [86.7200, 27.6900], # Lukla river crossing
+            [86.9250, 27.8986],
+            [86.8850, 27.8990],
+            [86.8320, 27.8930],
+            [86.7850, 27.8820],
+            [86.7640, 27.8630],
+            [86.7200, 27.8050],
+            [86.7120, 27.7400],
+            [86.7200, 27.6900],
         ],
         "exposed_assets": [
             {
@@ -176,13 +164,13 @@ LAKE_DRAINAGE_CORRIDORS = {
         "lake_name": "Thulagi Lake",
         "river_name": "Dona Khola & Marsyangdi River",
         "path_coords": [
-            [84.4864, 28.4883], # Lake mouth
-            [84.4500, 28.4700], # Upper Dona Khola
-            [84.4080, 28.4550], # Dona Kharka
-            [84.4050, 28.4350], # Marsyangdi Confluence / Dharapani
-            [84.3800, 28.3800], # Tal Village
-            [84.3950, 28.3300], # Chamje
-            [84.4100, 28.2700], # Upper Marsyangdi A HEP
+            [84.4864, 28.4883],
+            [84.4500, 28.4700],
+            [84.4080, 28.4550],
+            [84.4050, 28.4350],
+            [84.3800, 28.3800],
+            [84.3950, 28.3300],
+            [84.4100, 28.2700],
         ],
         "exposed_assets": [
             {
@@ -222,16 +210,14 @@ LAKE_DRAINAGE_CORRIDORS = {
     },
 }
 
-# Breach Inundation Tier Specifications
-# Widths in meters (lateral valley spread), peak discharge (Qpeak m³/s), reach (km)
 FLOOD_TIERS = [
     {
         "tier": "low",
         "label": "Tier 1: Minor Breach / Piping Flow",
         "buffer_m": 75,
         "peak_discharge_m3s": 2400,
-        "color_hex": "#3b82f6", # Blue
-        "reach_factor": 0.50,   # Floods 50% of the valley reach
+        "color_hex": "#3b82f6",
+        "reach_factor": 0.50,
         "description": "Controlled spillway overtopping or minor piping; damages riverside paths and small pedestrian footbridges."
     },
     {
@@ -239,8 +225,8 @@ FLOOD_TIERS = [
         "label": "Tier 2: Partial Moraine Dam Failure",
         "buffer_m": 160,
         "peak_discharge_m3s": 6800,
-        "color_hex": "#f59e0b", # Amber
-        "reach_factor": 0.75,   # Floods 75% of the valley reach
+        "color_hex": "#f59e0b",
+        "reach_factor": 0.75,
         "description": "50% moraine crest breach; severe bank scour, threatens low-lying bridges and headworks."
     },
     {
@@ -248,22 +234,17 @@ FLOOD_TIERS = [
         "label": "Tier 3: Catastrophic Moraine Collapse",
         "buffer_m": 320,
         "peak_discharge_m3s": 14500,
-        "color_hex": "#ef4444", # Red
-        "reach_factor": 1.00,   # Maximum downstream inundation reach
+        "color_hex": "#ef4444",
+        "reach_factor": 1.00,
         "description": "Total moraine dam collapse; high-velocity debris wave, severe inundation of downstream villages and hydropower assets."
     },
 ]
 
 def calculate_flood_arrival_minutes(distance_km: float) -> int:
-    """
-    Himalayan steep-canyon flood wave propagation velocity:
-    v ≈ 5.5 m/s (approx 20 km/h) through narrow V-shaped gorges.
-    """
     velocity_mps = 5.5
     distance_m = distance_km * 1000.0
     seconds = distance_m / velocity_mps
     return max(5, int(round(seconds / 60.0)))
-
 
 def build_flood_zones_geojson() -> Dict:
     features = []
@@ -274,22 +255,20 @@ def build_flood_zones_geojson() -> Dict:
         full_line_utm = transform(project_to_utm, full_line)
         total_length_m = full_line_utm.length
 
-        # 1. Create Inundation Polygons (Low, Moderate, Severe)
         for tier_info in FLOOD_TIERS:
-            # Clip line length according to breach reach
+
             sub_length_m = total_length_m * tier_info["reach_factor"]
-            
-            # Interpolate coordinates along the reach
+
             reach_points = []
             num_samples = max(10, int(len(coords) * tier_info["reach_factor"]) + 4)
             for frac in [i / num_samples for i in range(num_samples + 1)]:
                 pt = full_line_utm.interpolate(frac * sub_length_m)
                 reach_points.append(pt)
-            
+
             reach_line_utm = LineString(reach_points)
-            # Buffer by lateral flood width in meters
+
             poly_utm = reach_line_utm.buffer(tier_info["buffer_m"], cap_style=2, join_style=2)
-            # Reproject to WGS84 (Lon/Lat)
+
             poly_wgs84 = transform(project_to_wgs84, poly_utm)
 
             feature = {
@@ -310,12 +289,21 @@ def build_flood_zones_geojson() -> Dict:
             }
             features.append(feature)
 
-        # 2. Create Exposed Infrastructure Points (Villages, Hydropower, Bridges)
+        features.append({
+            "type": "Feature",
+            "geometry": {"type": "LineString", "coordinates": coords},
+            "properties": {
+                "feature_type": "drainage_path",
+                "lake_id": lake_id,
+                "lake_name": data["lake_name"],
+                "river_basin": data["river_name"],
+            },
+        })
+
         for asset in data["exposed_assets"]:
             eta_mins = calculate_flood_arrival_minutes(asset["distance_km"])
             pt_geom = Point(asset["lon"], asset["lat"])
 
-            # Determine flood impact tier based on distance
             if asset["distance_km"] < 15.0:
                 threat_tier = "severe"
             elif asset["distance_km"] < 30.0:
@@ -353,7 +341,6 @@ def build_flood_zones_geojson() -> Dict:
         "features": features,
     }
     return output
-
 
 def main():
     output_path = Path(__file__).resolve().parent.parent / "data" / "flood_zones.geojson"

@@ -6,7 +6,16 @@ export type LakeFeature = Feature<Polygon, LakeProps>
 export interface FloodProps { lake_id: string; origin: [number, number]; tier?: string }
 export type FloodFeature = Feature<Polygon, FloodProps>
 
-export interface ExposureProps { name: string; kind: 'village' | 'hydropower' | 'bridge'; population?: number; lake_id: string }
+export interface ExposureProps {
+  name: string
+  kind: 'village' | 'hydropower' | 'bridge'
+  population?: number
+  lake_id: string
+  eta_minutes?: number | null
+  distance_km?: number | null
+  criticality?: string
+  threat_tier?: string
+}
 export type ExposureFeature = Feature<Point, ExposureProps>
 
 export type LakeCollection = FeatureCollection<Polygon, LakeProps>

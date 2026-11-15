@@ -1,3 +1,4 @@
+import type { Position } from 'geojson'
 import type { ExposureFeature, ExposureResponse, FloodFeature, LakeCollection, MetaResponse, SimResponse, TrendsResponse } from '../types'
 import { demoExposure, demoFloods, demoLakes } from './demoData'
 import { smoothPolygon } from './geo'
@@ -55,12 +56,20 @@ function normalizeExposure(j: any): ExposureFeature[] {
   for (const f of j.features ?? []) {
     if (f.geometry?.type !== 'Point' || !f.properties?.lake_id) continue
     const t = String(pick(f.properties, ['kind', 'type', 'asset_type', 'category', 'infrastructure']) ?? '').toLowerCase()
+    const crit = pick(f.properties, ['criticality', 'priority'])
+    const tier = pick(f.properties, ['threat_tier', 'tier'])
     out.push({
       type: 'Feature', geometry: f.geometry, properties: {
         lake_id: String(f.properties.lake_id),
         name: String(pick(f.properties, ['name', 'name_en', 'title']) ?? 'Unnamed'),
         kind: t.includes('hydro') || t.includes('power') ? 'hydropower' : t.includes('bridge') ? 'bridge' : 'village',
-        population: pick(f.properties, ['population', 'pop'])
+        population: pick(f.properties, ['population', 'pop', 'residents']),
+        eta_minutes: pick(f.properties, ['eta_minutes', 'eta_min']) != null
+          ? Number(pick(f.properties, ['eta_minutes', 'eta_min'])) : null,
+        distance_km: pick(f.properties, ['distance_from_lake_km', 'distance_km']) != null
+          ? Number(pick(f.properties, ['distance_from_lake_km', 'distance_km'])) : null,
+        criticality: crit != null ? String(crit).toUpperCase() : undefined,
+        threat_tier: tier != null ? String(tier).toLowerCase() : undefined,
       }
     })
   }
@@ -68,6 +77,16 @@ function normalizeExposure(j: any): ExposureFeature[] {
   return out
 }
 
+function normalizePaths(j: any): Record<string, Position[]> {
+  const out: Record<string, Position[]> = {}
+  for (const f of j.features ?? []) {
+    if (f.geometry?.type !== 'LineString' || !f.properties?.lake_id) continue
+    if (f.geometry.coordinates.length > 1) out[String(f.properties.lake_id)] = f.geometry.coordinates
+  }
+  return out
+}
+
+export const loadPaths = (): Promise<Record<string, Position[]>> => tryJson(import.meta.env.VITE_FLOOD_URL ?? '/data/flood_zones.geojson', () => ({}), normalizePaths)
 export const loadLakes = (): Promise<LakeCollection> => tryJson(import.meta.env.VITE_LAKES_URL ?? '/data/lakes_master.geojson', demoLakes, normalizeLakes)
 export const loadFloods = (): Promise<FloodFeature[]> => tryJson(import.meta.env.VITE_FLOOD_URL ?? '/data/flood_zones.geojson', demoFloods, normalizeFloods)
 export const loadExposure = (): Promise<ExposureFeature[]> => tryJson(import.meta.env.VITE_EXPOSURE_URL ?? '/data/flood_zones.geojson', demoExposure, normalizeExposure)
