@@ -3,16 +3,36 @@ import Map, { Layer, Marker, Source, type MapRef } from 'react-map-gl/mapbox'
 import type { ExpressionSpecification } from 'mapbox-gl'
 import type { Feature, FeatureCollection, LineString, Polygon } from 'geojson'
 import 'mapbox-gl/dist/mapbox-gl.css'
-import type { ExposureFeature, LakeProps } from '../types'
+import type {
+  ExposureFeature,
+  LakeProps,
+  FloodTier
+} from '../types'
 
 const TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined
 const DEFAULT_STYLE = 'mapbox://styles/mapbox/outdoors-v12'
 
 const YEAR_RAMP: ExpressionSpecification = ['interpolate', ['linear'], ['get', 'year'], 1986, '#facc15', 2006, '#34d399', 2026, '#22d3ee']
 // Breach tiers: blue = low, amber = moderate, red = catastrophic. Severe drawn first (bottom), low last (top).
-const TIER_COLOR: ExpressionSpecification = ['match', ['get', 'tier'], 'Low', '#3b82f6', 'Moderate', '#f59e0b', 'Severe', '#ef4444', '#9ca3af']
-const TIER_ORDER: ExpressionSpecification = ['match', ['get', 'tier'], 'Severe', 0, 'Moderate', 1, 'Low', 2, 3]
+// Flood tier colors: lowercase values match api.ts
+const TIER_COLOR: ExpressionSpecification = [
+  'match',
+  ['get', 'tier'],
+  'low', '#3b82f6',
+  'moderate', '#f59e0b',
+  'severe', '#ef4444',
+  '#9ca3af'
+]
 
+// Draw severe first, moderate second, low last
+const TIER_ORDER: ExpressionSpecification = [
+  'match',
+  ['get', 'tier'],
+  'severe', 0,
+  'moderate', 1,
+  'low', 2,
+  3
+]
 // Approximate peak positions/heights - verify before presenting as fact.
 const PEAKS = [
   { name: 'Everest', m: 8849, lon: 86.925, lat: 27.988 }, { name: 'Lhotse', m: 8516, lon: 86.933, lat: 27.962 },
@@ -30,7 +50,7 @@ interface Props {
   lakeNow: FeatureCollection<Polygon, LakeProps & { op: number }>
   rings: FeatureCollection<LineString, LakeProps>
   scenarioLake: Feature<Polygon> | null
-  flood: FeatureCollection<Polygon, { tier: string }> | null
+  flood: FeatureCollection<Polygon, { tier: FloodTier }> | null
   exposure: { feature: ExposureFeature; exposed: boolean }[]
   mapStyle?: string
   lakeLabel?: { name: string; lon: number; lat: number } | null

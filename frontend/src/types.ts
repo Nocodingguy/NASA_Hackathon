@@ -17,10 +17,17 @@ export type LakeCollection = FeatureCollection<Polygon, LakeProps>
 
 // ---------------- FLOOD ZONES ----------------
 
+export type FloodTier = 'low' | 'moderate' | 'severe'
+
 export interface FloodProps {
   lake_id: string
   origin?: [number, number]
-  tier?: string
+  tier: FloodTier
+  tier_label?: string
+  buffer_width_m?: number
+  peak_discharge_m3s?: number
+  color_hex?: string
+  description?: string
 }
 
 export type FloodFeature = Feature<Polygon, FloodProps>

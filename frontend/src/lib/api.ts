@@ -3,6 +3,7 @@ import type {
   ExposureFeature,
   ExposureResponse,
   FloodFeature,
+  FloodTier,
   LakeCollection,
   MetaResponse,
   Rating,
@@ -93,9 +94,9 @@ function normalizeLakes(json: any): LakeCollection {
   }
 }
 
-// ---------------- FLOOD ZONES ----------------
+// --------------- FLOOD ZONES ----------------
 
-function tierOf(properties: any): string {
+function tierOf(properties: any): FloodTier | null {
   const value = String(
     pick(properties, [
       'tier',
@@ -107,44 +108,47 @@ function tierOf(properties: any): string {
     ]) ?? ''
   ).toLowerCase()
 
-  if (/sev|high|cata|collapse/.test(value)) {
-    return 'Severe'
+  if (/severe|high|catastrophic|collapse/.test(value)) {
+    return 'severe'
   }
 
-  if (/mod|med|amber/.test(value)) {
-    return 'Moderate'
+  if (/moderate|medium|amber/.test(value)) {
+    return 'moderate'
   }
 
   if (/low|minor/.test(value)) {
-    return 'Low'
+    return 'low'
   }
 
-  return 'Unknown'
+  return null
 }
 
 function normalizeFloods(json: any): FloodFeature[] {
   const output: FloodFeature[] = []
 
   for (const feature of json.features ?? []) {
+    const properties = feature.properties ?? {}
+
     if (
-      feature.properties?.feature_type &&
-      feature.properties.feature_type !== 'inundation_zone'
+      properties.feature_type &&
+      properties.feature_type !== 'inundation_zone'
     ) {
       continue
     }
 
+    const tier = tierOf(properties)
     const geometry = feature.geometry
 
-    const polygons =
-      geometry?.type === 'Polygon'
-        ? [geometry.coordinates]
-        : geometry?.type === 'MultiPolygon'
-          ? geometry.coordinates
-          : []
-
-    if (!polygons.length || !feature.properties?.lake_id) {
+    if (!tier || !properties.lake_id || !geometry) {
       continue
     }
+
+    const polygons =
+      geometry.type === 'Polygon'
+        ? [geometry.coordinates]
+        : geometry.type === 'MultiPolygon'
+          ? geometry.coordinates
+          : []
 
     for (const coordinates of polygons) {
       output.push({
@@ -156,24 +160,29 @@ function normalizeFloods(json: any): FloodFeature[] {
         }),
 
         properties: {
-          lake_id: String(feature.properties.lake_id),
-          tier: tierOf(feature.properties),
-          origin: feature.properties.origin
+          lake_id: String(properties.lake_id),
+          tier,
+          origin: properties.origin,
+          tier_label: properties.tier_label,
+          buffer_width_m: properties.buffer_width_m,
+          peak_discharge_m3s: properties.peak_discharge_m3s,
+          color_hex: properties.color_hex,
+          description: properties.description
         }
       })
     }
   }
 
-  console.log(
-    '[GLOF] Flood polygons:',
-    output.length,
-    'tiers:',
-    [...new Set(output.map(f => f.properties.tier))]
-  )
+  console.log('[GLOF] Flood polygons:', output.length)
+
+  console.table({
+    low: output.filter(f => f.properties.tier === 'low').length,
+    moderate: output.filter(f => f.properties.tier === 'moderate').length,
+    severe: output.filter(f => f.properties.tier === 'severe').length
+  })
 
   return output
 }
-
 // ---------------- EXPOSURE ----------------
 
 function normalizeExposure(json: any): ExposureFeature[] {

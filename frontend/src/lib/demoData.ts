@@ -20,11 +20,19 @@ export function demoLakes(): LakeCollection {
 }
 
 const IMJA_PATH: [number, number][] = [[86.918, 27.8985], [86.88, 27.895], [86.835, 27.892], [86.80, 27.868], [86.79, 27.855],
-  [86.75, 27.83], [86.714, 27.805], [86.71, 27.775], [86.712, 27.745], [86.731, 27.687]]
+[86.75, 27.83], [86.714, 27.805], [86.71, 27.775], [86.712, 27.745], [86.731, 27.687]]
 
 export function demoFloods(): FloodFeature[] {
   const halfW = [120, 120, 150, 200, 220, 280, 330, 380, 420, 480]
-  return [{ type: 'Feature', geometry: bufferLine(IMJA_PATH, halfW), properties: { lake_id: 'imja', origin: IMJA_DAM } }]
+  return [{
+    type: 'Feature',
+    geometry: bufferLine(IMJA_PATH, halfW),
+    properties: {
+      lake_id: 'imja',
+      tier: 'severe',
+      origin: IMJA_DAM
+    }
+  }]
 }
 
 export function demoExposure(): ExposureFeature[] {
