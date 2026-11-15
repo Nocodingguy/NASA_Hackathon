@@ -1,0 +1,32 @@
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+
+# Satellite & Geospatial Data (raw satellite scenes)
+*.tif
+*.tiff
+*.cog
+*.nc
+*.hdf
+*.tar.gz
+*.zip
+.odc-stac/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.next/
+.npm
+
+# Env & OS
+.env
+.DS_Store
+.vscode/
+.idea/
+.env
+node_modules/
+dist/
