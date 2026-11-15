@@ -1,3 +1,5 @@
+
+
 import json
 from pathlib import Path
 from typing import Dict, List
@@ -238,6 +240,15 @@ FLOOD_TIERS = [
     },
 ]
 
+CRITICAL_ETA_MINUTES = 60
+
+
+def escalate_criticality(criticality: str, eta_minutes: int) -> str:
+    if eta_minutes is not None and eta_minutes <= CRITICAL_ETA_MINUTES:
+        return "CRITICAL"
+    return criticality
+
+
 def calculate_flood_arrival_minutes(distance_km: float) -> int:
     velocity_mps = 5.5
     distance_m = distance_km * 1000.0
@@ -322,7 +333,7 @@ def build_flood_zones_geojson() -> Dict:
                     "elevation_m": asset["elevation_m"],
                     "distance_from_lake_km": asset["distance_km"],
                     "eta_minutes": eta_mins,
-                    "criticality": asset["criticality"],
+                    "criticality": escalate_criticality(asset["criticality"], eta_mins),
                     "threat_tier": threat_tier,
                     "details": asset["details"],
                 },

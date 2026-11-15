@@ -42,7 +42,7 @@
             ],
             [
               86.24848133600501,
-              27.839251797279882
+              27.83925179727988
             ],
             [
               86.21991410753336,
@@ -160,7 +160,7 @@
             ],
             [
               86.18671199412294,
-              27.779987914068926
+              27.779987914068922
             ],
             [
               86.15442166264783,
@@ -278,7 +278,7 @@
             ],
             [
               86.20913178755669,
-              27.79217873356952
+              27.792178733569518
             ],
             [
               86.17365556476105,
@@ -391,6 +391,60 @@
     {
       "type": "Feature",
       "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            86.4769,
+            27.8614
+          ],
+          [
+            86.442,
+            27.863
+          ],
+          [
+            86.375,
+            27.855
+          ],
+          [
+            86.29,
+            27.842
+          ],
+          [
+            86.21,
+            27.838
+          ],
+          [
+            86.195,
+            27.825
+          ],
+          [
+            86.208,
+            27.795
+          ],
+          [
+            86.155,
+            27.762
+          ],
+          [
+            86.095,
+            27.72
+          ],
+          [
+            86.02,
+            27.65
+          ]
+        ]
+      },
+      "properties": {
+        "feature_type": "drainage_path",
+        "lake_id": "tsho_rolpa",
+        "lake_name": "Tsho Rolpa",
+        "river_basin": "Rolwaling Khola & Tama Koshi"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
         "type": "Point",
         "coordinates": [
           86.375,
@@ -407,7 +461,7 @@
         "elevation_m": 4180,
         "distance_from_lake_km": 10.5,
         "eta_minutes": 32,
-        "criticality": "HIGH",
+        "criticality": "CRITICAL",
         "threat_tier": "severe",
         "details": "High-altitude pastoral settlement (~80 residents)"
       }
@@ -544,7 +598,7 @@
             ],
             [
               86.77816342090782,
-              27.874849410008757
+              27.874849410008753
             ],
             [
               86.76492416044503,
@@ -630,7 +684,7 @@
           [
             [
               86.89646058339959,
-              27.897442103551544
+              27.89744210355154
             ],
             [
               86.86812053963538,
@@ -646,7 +700,7 @@
             ],
             [
               86.78521827965614,
-              27.88013634776428
+              27.880136347764278
             ],
             [
               86.76559512507015,
@@ -718,7 +772,7 @@
             ],
             [
               86.89646058339959,
-              27.897442103551544
+              27.89744210355154
             ]
           ]
         ]
@@ -808,7 +862,7 @@
             ],
             [
               86.71648132214212,
-              27.80296510334285
+              27.802965103342853
             ],
             [
               86.73311898361791,
@@ -869,6 +923,52 @@
     {
       "type": "Feature",
       "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            86.925,
+            27.8986
+          ],
+          [
+            86.885,
+            27.899
+          ],
+          [
+            86.832,
+            27.893
+          ],
+          [
+            86.785,
+            27.882
+          ],
+          [
+            86.764,
+            27.863
+          ],
+          [
+            86.72,
+            27.805
+          ],
+          [
+            86.712,
+            27.74
+          ],
+          [
+            86.72,
+            27.69
+          ]
+        ]
+      },
+      "properties": {
+        "feature_type": "drainage_path",
+        "lake_id": "imja_tsho",
+        "lake_name": "Imja Tsho (Everest Region)",
+        "river_basin": "Imja Khola & Dudh Koshi"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
         "type": "Point",
         "coordinates": [
           86.832,
@@ -885,7 +985,7 @@
         "elevation_m": 4410,
         "distance_from_lake_km": 9.8,
         "eta_minutes": 30,
-        "criticality": "HIGH",
+        "criticality": "CRITICAL",
         "threat_tier": "severe",
         "details": "Key Everest acclimatization hub and lodges (~400 tourists/residents)"
       }
@@ -909,7 +1009,7 @@
         "elevation_m": 3985,
         "distance_from_lake_km": 15.2,
         "eta_minutes": 46,
-        "criticality": "HIGH",
+        "criticality": "CRITICAL",
         "threat_tier": "moderate",
         "details": "Oldest monastery in Khumbu and residential village"
       }
@@ -1017,12 +1117,20 @@
               28.42487592727974
             ],
             [
+              84.3955256281225,
+              28.412349019279286
+            ],
+            [
               84.38983899046475,
               28.399838337495595
             ],
             [
               84.38841929368847,
-              28.400342823336246
+              28.40034282333625
+            ],
+            [
+              84.39410578128276,
+              28.412853554452614
             ],
             [
               84.39978604854983,
@@ -1050,7 +1158,7 @@
             ],
             [
               84.4860214190838,
-              28.488888023486044
+              28.48888802348604
             ],
             [
               84.48677857653644,
@@ -1099,8 +1207,12 @@
               28.450288657628445
             ],
             [
-              84.40492437233061,
-              28.43096459786124
+              84.40492437233063,
+              28.43096459786125
+            ],
+            [
+              84.39633020247803,
+              28.41206310902605
             ],
             [
               84.38785072113355,
@@ -1127,8 +1239,12 @@
               28.394262915532153
             ],
             [
+              84.39330119588679,
+              28.41313945072885
+            ],
+            [
               84.40177135014126,
-              28.4317694399503
+              28.431769439950298
             ],
             [
               84.40594652500961,
@@ -1206,7 +1322,7 @@
             ],
             [
               84.38764224642256,
-              28.365784921543273
+              28.36578492154327
             ],
             [
               84.39465632406878,
@@ -1222,7 +1338,7 @@
             ],
             [
               84.41318325206441,
-              28.27062330185255
+              28.270623301852545
             ],
             [
               84.40681679097884,
@@ -1299,6 +1415,48 @@
     {
       "type": "Feature",
       "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            84.4864,
+            28.4883
+          ],
+          [
+            84.45,
+            28.47
+          ],
+          [
+            84.408,
+            28.455
+          ],
+          [
+            84.405,
+            28.435
+          ],
+          [
+            84.38,
+            28.38
+          ],
+          [
+            84.395,
+            28.33
+          ],
+          [
+            84.41,
+            28.27
+          ]
+        ]
+      },
+      "properties": {
+        "feature_type": "drainage_path",
+        "lake_id": "thulagi_lake",
+        "lake_name": "Thulagi Lake",
+        "river_basin": "Dona Khola & Marsyangdi River"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
         "type": "Point",
         "coordinates": [
           84.405,
@@ -1366,148 +1524,6 @@
         "criticality": "HIGH",
         "threat_tier": "low",
         "details": "Run-of-the-river power station infrastructure"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            86.4769,
-            27.8614
-          ],
-          [
-            86.442,
-            27.863
-          ],
-          [
-            86.375,
-            27.855
-          ],
-          [
-            86.29,
-            27.842
-          ],
-          [
-            86.21,
-            27.838
-          ],
-          [
-            86.195,
-            27.825
-          ],
-          [
-            86.208,
-            27.795
-          ],
-          [
-            86.155,
-            27.762
-          ],
-          [
-            86.095,
-            27.72
-          ],
-          [
-            86.02,
-            27.65
-          ]
-        ]
-      },
-      "properties": {
-        "feature_type": "drainage_path",
-        "lake_id": "tsho_rolpa",
-        "lake_name": "Tsho Rolpa",
-        "river_basin": "Rolwaling Khola & Tama Koshi"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            86.925,
-            27.8986
-          ],
-          [
-            86.885,
-            27.899
-          ],
-          [
-            86.832,
-            27.893
-          ],
-          [
-            86.785,
-            27.882
-          ],
-          [
-            86.764,
-            27.863
-          ],
-          [
-            86.72,
-            27.805
-          ],
-          [
-            86.712,
-            27.74
-          ],
-          [
-            86.72,
-            27.69
-          ]
-        ]
-      },
-      "properties": {
-        "feature_type": "drainage_path",
-        "lake_id": "imja_tsho",
-        "lake_name": "Imja Tsho (Everest Region)",
-        "river_basin": "Imja Khola & Dudh Koshi"
-      }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            84.4864,
-            28.4883
-          ],
-          [
-            84.45,
-            28.47
-          ],
-          [
-            84.408,
-            28.455
-          ],
-          [
-            84.405,
-            28.435
-          ],
-          [
-            84.38,
-            28.38
-          ],
-          [
-            84.395,
-            28.33
-          ],
-          [
-            84.41,
-            28.27
-          ]
-        ]
-      },
-      "properties": {
-        "feature_type": "drainage_path",
-        "lake_id": "thulagi_lake",
-        "lake_name": "Thulagi Lake",
-        "river_basin": "Dona Khola & Marsyangdi River"
       }
     }
   ]
