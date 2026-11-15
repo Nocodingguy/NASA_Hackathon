@@ -1,490 +1,243 @@
-
-import { useEffect, useMemo, useRef, useState } from 'react'
-
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { MapRef } from 'react-map-gl/mapbox'
-import type { Feature, Polygon } from 'geojson'
-
+import type { Feature, FeatureCollection, Polygon, Position } from 'geojson'
 import MapView from './components/MapView'
 import Scrubber from './components/Scrubber'
 import ActionCard from './components/ActionCard'
 import Credits from './components/Credits'
 import Detective from './detective/Detective'
-
+import Scrollytelling from './story/Scrollytelling'
+import { gsap, reducedMotion } from './lib/motion'
 import { useTimeline } from './hooks/useTimeline'
 import { useScenario, useSmooth } from './hooks/useScenario'
-
-import {
-  loadExposure,
-  loadFloods,
-  loadLakes
-} from './lib/api'
-
+import { loadExposure, loadLakes, loadPaths } from './lib/api'
 import { YEAR_MAX, YEAR_MIN } from './lib/demoData'
-
-import {
-  centroid,
-  inPolygon,
-  mainAxis,
-  scalePolygon
-} from './lib/geo'
-
+import { bufferLine, catmullRom, centroid, cumulativeKm, projectOnLine, scalePolygon, sliceLine } from './lib/geo'
 import { lakeAt } from './lib/timeline'
+import type { ExposureFeature, LakeFeature } from './types'
 
-import type {
-  ExposureFeature,
-  FloodFeature,
-  LakeFeature
-} from './types'
+type View = 'story' | 'detective' | 'map'
 
-const K_ACROSS = 0.4
-const K_ALONG = 0.15
+const RATIO_MIN = 0.85
+const RATIO_MAX = 3.2
+const REACH_MIN_FRAC = 0.2
+const RATIO_FULL = 2.6
+const RATIO_START = 0.9
+const BASE_HALF_WIDTH_M = 90
+const WIDEN_M_PER_KM = 7
+// Breach tiers, outermost first. `reach` follows Member 1's reach factors; `width` is a visual choice.
+const TIERS = [
+  { tier: 'severe', reach: 1.0, width: 1.0 },
+  { tier: 'moderate', reach: 0.75, width: 0.6 },
+  { tier: 'low', reach: 0.5, width: 0.35 },
+] as const
 
-const TIER_LEGEND: [string, string][] = [
+const TIER_LEGEND = [
   ['#3b82f6', 'Tier 1 · Low breach'],
   ['#f59e0b', 'Tier 2 · Moderate breach'],
-  ['#ef4444', 'Tier 3 · Catastrophic collapse']
-]
+  ['#ef4444', 'Tier 3 · Catastrophic collapse'],
+] as const
+
+function reachFraction(ratio: number): number {
+  const f = Math.min(1, Math.max(0, (ratio - RATIO_START) / (RATIO_FULL - RATIO_START)))
+  return REACH_MIN_FRAC + (1 - REACH_MIN_FRAC) * f
+}
 
 export default function App() {
   const mapRef = useRef<MapRef>(null)
-
   const [lakeId, setLakeId] = useState('')
   const [lakes, setLakes] = useState<LakeFeature[]>([])
-  const [floods, setFloods] = useState<FloodFeature[]>([])
+  const [paths, setPaths] = useState<Record<string, Position[]>>({})
   const [exposure, setExposure] = useState<ExposureFeature[]>([])
-
   const [deltaC, setDeltaC] = useState(1.5)
   const [years, setYears] = useState(30)
-
-  const [detectiveOpen, setDetectiveOpen] = useState(true)
+  const [view, setView] = useState<View>('story')
+  const root = useRef<HTMLDivElement>(null)
+  const curtain = useRef<HTMLDivElement>(null)
   const [creditsOpen, setCreditsOpen] = useState(false)
-
-  // ---------------- LAKE LIST ----------------
 
   const lakeList = useMemo(() => {
     const byId = new Map<string, LakeFeature>()
-
-    for (const feature of lakes) {
-      const id = feature.properties.lake_id
-      const current = byId.get(id)
-
-      if (
-        !current ||
-        feature.properties.year > current.properties.year
-      ) {
-        byId.set(id, feature)
-      }
+    for (const f of lakes) {
+      const cur = byId.get(f.properties.lake_id)
+      if (!cur || f.properties.year > cur.properties.year) byId.set(f.properties.lake_id, f)
     }
-
-    return [...byId.entries()].map(([id, feature]) => ({
-      id,
-      label: feature.properties.lake_name ?? id,
-      center: centroid(feature.geometry) as [number, number]
+    return [...byId.entries()].map(([id, f]) => ({
+      id, label: f.properties.lake_name ?? id, center: centroid(f.geometry) as [number, number]
     }))
   }, [lakes])
 
-  // ---------------- LAKE SELECTION ----------------
+  const flyTo = (center: [number, number]) =>
+    mapRef.current?.flyTo({ center, zoom: 12.5, bearing: 200, pitch: 62, duration: 3500, essential: true })
 
   const selectLake = (id: string) => {
     setLakeId(id)
-
-    const lake = lakeList.find(item => item.id === id)
-
-    if (lake) {
-      mapRef.current?.flyTo({
-        center: lake.center,
-        zoom: 12.5,
-        bearing: 200,
-        pitch: 62,
-        duration: 3500,
-        essential: true
-      })
-    }
+    const l = lakeList.find(x => x.id === id)
+    if (l) flyTo(l.center)
   }
 
-  // Data Detective can open a selected lake
-  // and optionally set its temperature scenario.
+  const go = (next: View, after?: () => void) => {
+    const c = curtain.current
+    if (!c || reducedMotion()) { setView(next); after?.(); return }
+    gsap.timeline()
+      .to(c, { autoAlpha: 1, duration: 0.4, ease: 'power2.in' })
+      .add(() => { setView(next); after?.() })
+      .to(c, { autoAlpha: 0, duration: 0.8, ease: 'power2.out', delay: 0.15 })
+  }
+
+  const goMap = () => go('map', () => {
+    const l = lakeList.find(x => x.id === lakeId)
+    if (l) flyTo(l.center)
+  })
 
   const openOnMap = (id: string, delta?: number) => {
     selectLake(id)
-
-    if (delta != null) {
-      setDeltaC(delta)
-    }
-
-    setDetectiveOpen(false)
+    if (delta != null) setDeltaC(delta)
+    go('map')
   }
 
-  // ---------------- TIMELINE ----------------
+  useLayoutEffect(() => {
+    if (view !== 'map' || reducedMotion() || !root.current) return
+    const ctx = gsap.context(() => {
+      gsap.from('[data-dock="left"]', { xPercent: -14, autoAlpha: 0, duration: 1, ease: 'power3.out', delay: 0.5 })
+      gsap.from('[data-dock="right"]', { xPercent: 10, autoAlpha: 0, duration: 1, ease: 'power3.out', delay: 0.65 })
+      gsap.from('[data-dock="bottom"]', { yPercent: 40, autoAlpha: 0, duration: 1, ease: 'power3.out', delay: 0.8 })
+    }, root)
+    return () => ctx.revert()
+  }, [view])
 
   const epochYears = useMemo(
-    () =>
-      lakes
-        .filter(feature =>
-          feature.properties.lake_id === lakeId
-        )
-        .map(feature => feature.properties.year),
+    () => lakes.filter(f => f.properties.lake_id === lakeId).map(f => f.properties.year), [lakes, lakeId])
+  const yMin = epochYears.length ? Math.min(...epochYears) : YEAR_MIN
+  const yMax = epochYears.length ? Math.max(...epochYears) : YEAR_MAX
+  const tl = useTimeline(yMin, yMax)
+  useEffect(() => { tl.setT(yMax) }, [yMax, lakeId])
 
-    [lakes, lakeId]
-  )
+  useEffect(() => { loadLakes().then(c => setLakes(c.features)); loadPaths().then(setPaths); loadExposure().then(setExposure) }, [])
+  useEffect(() => { if (!lakeId && lakeList.length) setLakeId(lakeList[0].id) }, [lakeList, lakeId])
+  useEffect(() => { console.log('lakes in data:', lakeList.map(l => l.id)) }, [lakeList])
 
-  const yMin = epochYears.length
-    ? Math.min(...epochYears)
-    : YEAR_MIN
+  const sim = useScenario(lakeId, deltaC, years)
+  const { now, rings, areaKm2 } = useMemo(() => lakeAt(lakes, lakeId, tl.t), [lakes, lakeId, tl.t])
 
-  const yMax = epochYears.length
-    ? Math.max(...epochYears)
-    : YEAR_MAX
+  const q0 = sim.baseQ, q1 = sim.data?.peak_discharge_m3s
+  const rawRatio = q0 && q1 ? q1 / q0 : 1 + 0.18 * deltaC * Math.sqrt(years / 25)
+  const ratio = useSmooth(Math.min(RATIO_MAX, Math.max(RATIO_MIN, rawRatio)))
 
-  const timeline = useTimeline(yMin, yMax)
-
-  useEffect(() => {
-    timeline.setT(yMax)
-  }, [yMax, lakeId])
-
-  // ---------------- LOAD GEOJSON DATA ----------------
-
-  useEffect(() => {
-    let active = true
-
-    async function loadData() {
-      try {
-        const [lakeData, floodData, exposureData] =
-          await Promise.all([
-            loadLakes(),
-            loadFloods(),
-            loadExposure()
-          ])
-
-        if (!active) return
-
-        setLakes(lakeData.features)
-        setFloods(floodData)
-        setExposure(exposureData)
-      } catch (error) {
-        console.error('[GLOF] Data loading failed:', error)
-      }
+  const river = useMemo(() => {
+    const origin = lakeList.find(l => l.id === lakeId)?.center
+    let raw = paths[lakeId]
+    if (!raw || raw.length < 2) {
+      const pts = exposure
+        .filter(e => e.properties.lake_id === lakeId)
+        .sort((x, y) => (x.properties.eta_minutes ?? x.properties.distance_km ?? 0) - (y.properties.eta_minutes ?? y.properties.distance_km ?? 0))
+        .map(e => e.geometry.coordinates)
+      raw = origin ? [origin, ...pts] : pts
     }
+    if (raw.length < 2) return null
+    const line = catmullRom(raw)
+    const cum = cumulativeKm(line)
+    return { line, cum, total: cum[cum.length - 1] }
+  }, [paths, exposure, lakeId, lakeList])
 
-    loadData()
+  const reachKm = river ? river.total * reachFraction(ratio) : 0
 
-    return () => {
-      active = false
-    }
-  }, [])
+  // Three nested breach bands along the river; all grow with the warming sliders.
+  const flood = useMemo<FeatureCollection<Polygon, { tier: string }> | null>(() => {
+    if (!river) return null
+    const widthScale = Math.pow(ratio, 0.6)
+    const features = TIERS.flatMap(t => {
+      const { pts, km } = sliceLine(river.line, river.cum, reachKm * t.reach)
+      if (pts.length < 2) return []
+      const halfW = km.map(k => (BASE_HALF_WIDTH_M + WIDEN_M_PER_KM * k) * widthScale * t.width)
+      return [{ type: 'Feature' as const, properties: { tier: t.tier }, geometry: bufferLine(pts, halfW) }]
+    })
+    return features.length ? { type: 'FeatureCollection' as const, features } : null
+  }, [river, reachKm, ratio])
 
-  // Select the first available lake automatically.
-
-  useEffect(() => {
-    if (!lakeId && lakeList.length > 0) {
-      setLakeId(lakeList[0].id)
-    }
-  }, [lakeList, lakeId])
-
-  // ---------------- SIMULATION ----------------
-
-  const sim = useScenario(
-    lakeId,
-    deltaC,
-    years
-  )
-
-  const {
-    now,
-    rings,
-    areaKm2
-  } = useMemo(
-    () => lakeAt(lakes, lakeId, timeline.t),
-    [lakes, lakeId, timeline.t]
-  )
-
-  // Smoothly animate the flood scaling.
-
-  const q0 = sim.baseQ
-  const q1 = sim.data?.risk_detail.breach.peak_discharge_m3s
-
-  const ratio = useSmooth(
-    q0 && q1
-      ? q1 / q0
-      : 1 + 0.12 * deltaC
-  )
-
-  // ---------------- FLOOD VISUALIZATION ----------------
-
-  const floodTiers = useMemo(() => {
-    const center = lakeList.find(
-      lake => lake.id === lakeId
-    )?.center
-
-    return floods
-      .filter(feature =>
-        feature.properties.lake_id === lakeId
-      )
-      .flatMap(feature => {
-        const origin = feature.properties.origin ?? center
-
-        if (!origin) return []
-
-        const geometry = scalePolygon(
-          feature.geometry,
-          origin,
-          Math.pow(ratio, K_ALONG),
-          Math.pow(ratio, K_ACROSS),
-          mainAxis(feature.geometry, origin)
-        )
-
-        return [{
-          type: 'Feature' as const,
-
-          properties: {
-            tier: feature.properties.tier ?? 'Unknown'
-          },
-
-          geometry
-        }]
-      })
-  }, [floods, lakeId, ratio, lakeList])
-
-  const floodFC = useMemo(
-    () =>
-      floodTiers.length
-        ? {
-          type: 'FeatureCollection' as const,
-          features: floodTiers
-        }
-        : null,
-
-    [floodTiers]
-  )
-
-  // ---------------- FUTURE LAKE SCENARIO ----------------
-
-  const scenarioLake = useMemo<
-    Feature<Polygon> | null
-  >(() => {
-    const latest = lakes
-      .filter(feature =>
-        feature.properties.lake_id === lakeId
-      )
-      .sort(
-        (a, b) =>
-          b.properties.year - a.properties.year
-      )[0]
-
-    if (!latest || !sim.data || deltaC === 0) {
-      return null
-    }
-
-    const newArea = sim.data.new_area_km2
-
-    if (
-      !Number.isFinite(newArea) ||
-      latest.properties.area_km2 <= 0
-    ) {
-      return null
-    }
-
-    const scale = Math.sqrt(
-      newArea / latest.properties.area_km2
-    )
-
-    return {
-      type: 'Feature',
-      properties: {},
-
-      geometry: scalePolygon(
-        latest.geometry,
-        centroid(latest.geometry),
-        scale,
-        scale
-      )
-    }
+  const scenarioLake = useMemo<Feature<Polygon> | null>(() => {
+    const latest = lakes.filter(f => f.properties.lake_id === lakeId).sort((a, b) => b.properties.year - a.properties.year)[0]
+    if (!latest || !sim.data || deltaC === 0) return null
+    const k = Math.sqrt(sim.data.new_area_km2 / latest.properties.area_km2)
+    return { type: 'Feature', properties: {}, geometry: scalePolygon(latest.geometry, centroid(latest.geometry), k, k) }
   }, [lakes, lakeId, sim.data, deltaC])
 
-  // ---------------- EXPOSED INFRASTRUCTURE ----------------
+  const exposureState = useMemo(() => {
+    return exposure
+      .filter(e => e.properties.lake_id === lakeId)
+      .map(feature => {
+        const exposed = !!river && projectOnLine(feature.geometry.coordinates, river.line, river.cum).along <= reachKm
+        return { feature, exposed }
+      })
+  }, [exposure, lakeId, river, reachKm])
 
-  const exposureState = useMemo(
-    () =>
-      exposure
-        .filter(feature =>
-          feature.properties.lake_id === lakeId
-        )
-        .map(feature => ({
-          feature,
-
-          exposed: floodTiers.some(tier =>
-            inPolygon(
-              feature.geometry.coordinates,
-              tier.geometry
-            )
-          )
-        })),
-
-    [exposure, lakeId, floodTiers]
-  )
-
-  // ---------------- CURRENT LAKE ----------------
-
-  const current = lakeList.find(
-    lake => lake.id === lakeId
-  )
-
-  const lakeName = current?.label ?? ''
-
-  const lakeLabel = current
-    ? {
-      name: current.label,
-      lon: current.center[0],
-      lat: current.center[1]
+  const dynamicEtaRows = useMemo(() => {
+    const rows = exposureState
+      .filter(e => e.exposed)
+      .map(({ feature: f }) => {
+        const p = f.properties
+        return {
+          name: p.name,
+          asset_type: p.kind,
+          eta_minutes: p.eta_minutes ?? null,
+          distance_km: p.distance_km ?? null,
+          criticality: (p.criticality ?? 'MEDIUM').toUpperCase(),
+        }
+      })
+      .sort((a, b) => (a.eta_minutes ?? 1e9) - (b.eta_minutes ?? 1e9))
+    if (!rows.length && sim.data?.risk_detail?.eta_table?.length) {
+      return sim.data.risk_detail.eta_table
     }
-    : null
+    return rows
+  }, [exposureState, sim.data])
 
-  const observedArea =
-    lakes
-      .filter(feature =>
-        feature.properties.lake_id === lakeId
-      )
-      .sort(
-        (a, b) =>
-          b.properties.year - a.properties.year
-      )[0]?.properties.area_km2 ?? null
-
-  // ---------------- RENDER ----------------
+  const lakeName = lakeList.find(l => l.id === lakeId)?.label ?? ''
+  const observedArea = useMemo(() => lakes.filter(f => f.properties.lake_id === lakeId).sort((x, y) => y.properties.year - x.properties.year)[0]?.properties.area_km2 ?? null, [lakes, lakeId])
 
   return (
-    <div className="relative h-full w-full">
+    <div ref={root} className="relative h-full w-full">
+      <MapView ref={mapRef} lakeNow={now} rings={rings} scenarioLake={scenarioLake} flood={flood} exposure={exposureState} />
 
-      {/* 3D MAP */}
-
-      <MapView
-        ref={mapRef}
-        lakeNow={now}
-        rings={rings}
-        scenarioLake={scenarioLake}
-        flood={floodFC}
-        exposure={exposureState}
-        lakeLabel={lakeLabel}
-      />
-
-      {/* LAKE SELECTOR */}
-
-      <div className="absolute left-4 top-4 rounded-xl bg-slate-900/85 p-3 text-slate-100 shadow-xl backdrop-blur">
-
-        <h1 className="mb-2 text-sm font-bold tracking-wide">
-          GLOF ATLAS · HIMALAYA
-        </h1>
-
-        <div className="flex flex-col gap-1">
-
-          {lakeList.map(lake => (
-            <button
-              key={lake.id}
-              onClick={() => selectLake(lake.id)}
-              aria-current={
-                lake.id === lakeId ? 'true' : undefined
-              }
-              className={`rounded px-2 py-1.5 text-left text-sm ${lake.id === lakeId
-                ? 'bg-white/20 font-semibold'
-                : 'hover:bg-white/10'
-                }`}
-            >
-              {lake.label}
-            </button>
-          ))}
-
-        </div>
-
-        <div className="mt-3 flex flex-col gap-2 border-t border-white/20 pt-3">
-
-          <button
-            className="rounded-lg bg-white/10 px-3 py-2 text-sm hover:bg-white/20"
-            onClick={() => setDetectiveOpen(true)}
-          >
-            Data Detective
-          </button>
-
-          <button
-            className="px-1 text-left text-xs text-slate-300 underline hover:text-white"
-            onClick={() => setCreditsOpen(true)}
-          >
-            Data and credits
-          </button>
-
-        </div>
-      </div>
-
-      {/* CLIMATE SIMULATION AND RISK ASSESSMENT */}
-
-      <ActionCard
-        lakeName={lakeName}
-        deltaC={deltaC}
-        years={years}
-        onDelta={setDeltaC}
-        onYears={setYears}
-        sim={sim.data}
-        baseQ={sim.baseQ}
-        observedAreaKm2={observedArea}
-        loading={sim.loading}
-        error={sim.error}
-        exposedCount={
-          exposureState.filter(item => item.exposed).length
-        }
-      />
-
-      {/* HISTORICAL TIMELINE */}
-
-      <Scrubber
-        t={timeline.t}
-        min={yMin}
-        max={yMax}
-        playing={timeline.playing}
-        areaKm2={areaKm2}
-        onChange={timeline.setT}
-        onToggle={timeline.toggle}
-      />
-
-      {/* BREACH TIER LEGEND */}
-
-      <div className="absolute bottom-4 left-4 rounded-xl bg-slate-900/85 p-3 text-xs text-slate-100 shadow-xl backdrop-blur">
-
-        <div className="mb-1 font-semibold">
-          Breach scenario
-        </div>
-
-        {TIER_LEGEND.map(([color, label]) => (
-          <div
-            key={label}
-            className="flex items-center gap-2"
-          >
-            <span
-              className="h-3 w-3 rounded-sm"
-              style={{ background: color }}
-            />
-
-            {label}
+      {view === 'map' && (
+        <>
+          <div data-dock="left" className="panel absolute left-4 top-4 w-56 p-4 max-sm:right-4 max-sm:w-auto">
+            <h1 className="display text-3xl">GlacierWatch</h1>
+            <p className="eyebrow mb-3 mt-2">Pick a lake</p>
+            <ul className="mb-4 space-y-1 max-sm:flex max-sm:flex-wrap max-sm:gap-1 max-sm:space-y-0">
+              {lakeList.map(l => (
+                <li key={l.id}>
+                  <button onClick={() => selectLake(l.id)} aria-current={l.id === lakeId}
+                    className={`w-full rounded px-2.5 py-1.5 text-left text-sm transition-colors ${l.id === lakeId ? 'bg-glacier font-semibold text-abyss' : 'text-ink hover:bg-paper-2'}`}>{l.label}</button>
+                </li>
+              ))}
+            </ul>
+            <div className="flex flex-col gap-1.5 border-t border-rule pt-3 max-sm:flex-row max-sm:flex-wrap">
+              <button className="btn btn-quiet justify-center" onClick={() => go('story')}>Replay the story</button>
+              <button className="btn btn-quiet justify-center" onClick={() => go('detective')}>Data Detective</button>
+              <button className="px-1 text-left text-xs text-ink-2 underline decoration-rule underline-offset-2 hover:text-ink" onClick={() => setCreditsOpen(true)}>Data and credits</button>
+            </div>
           </div>
-        ))}
 
-      </div>
+          <ActionCard lakeName={lakeName} deltaC={deltaC} years={years} onDelta={setDeltaC} onYears={setYears} sim={sim.data} baseQ={sim.baseQ}
+            observedAreaKm2={observedArea} loading={sim.loading} error={sim.error}
+            exposedCount={exposureState.filter(e => e.exposed).length}
+            etaRows={dynamicEtaRows} />
+          <Scrubber t={tl.t} min={yMin} max={yMax} playing={tl.playing} areaKm2={areaKm2} onChange={tl.setT} onToggle={tl.toggle} />
 
-      {/* DATA DETECTIVE */}
-
-      {detectiveOpen && (
-        <Detective
-          lakes={lakes}
-          onOpenMap={openOnMap}
-          onClose={() => setDetectiveOpen(false)}
-        />
+          <div className="panel absolute bottom-4 left-4 p-3 text-xs max-sm:hidden">
+            <div className="mb-1 font-semibold">Breach scenario</div>
+            {TIER_LEGEND.map(([c, l]) => (
+              <div key={l} className="flex items-center gap-2"><span className="h-3 w-3 rounded-sm" style={{ background: c }} />{l}</div>
+            ))}
+          </div>
+        </>
       )}
 
-      {/* DATA CREDITS */}
+      {view === 'story' && <Scrollytelling lakes={lakes} exposure={exposure} onDetective={() => go('detective')} onMap={goMap} />}
+      {view === 'detective' && <Detective lakes={lakes} onOpenMap={openOnMap} onClose={goMap} />}
+      {creditsOpen && <Credits onClose={() => setCreditsOpen(false)} />}
 
-      {creditsOpen && (
-        <Credits
-          onClose={() => setCreditsOpen(false)}
-        />
-      )}
-
+      <div ref={curtain} className="pointer-events-none invisible fixed inset-0 z-[80] bg-abyss opacity-0" />
     </div>
   )
 }

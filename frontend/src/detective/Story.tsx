@@ -15,8 +15,8 @@ interface Props { story: Story; lake: LakeInfo; beat: number; setBeat: (b: numbe
 export default function StoryRunner({ story, lake, beat, setBeat, onExit, onOpenMap }: Props) {
   return (
     <div>
-      <p className="eyebrow">{story.kicker}</p>
-      <h1 className="mb-1 font-serif text-4xl">{story.title}</h1>
+      <p data-reveal className="eyebrow">{story.kicker}</p>
+      <h1 data-reveal className="display mb-1 text-[clamp(2.6rem,6vw,4.6rem)]">{story.title}</h1>
       <ol className="mb-8 mt-4 flex gap-6 border-b border-rule text-sm">
         {BEATS.map((b, i) => (
           <li key={b}>
@@ -29,7 +29,7 @@ export default function StoryRunner({ story, lake, beat, setBeat, onExit, onOpen
 
       {beat === 0 && (
         <div className="grid gap-10 md:grid-cols-2">
-          <p className="font-serif text-xl leading-relaxed">{story.intro}</p>
+          <p data-reveal className="font-serif text-3xl leading-snug">{story.intro}</p>
           <LakeFacts lake={lake} />
         </div>
       )}
@@ -63,17 +63,19 @@ function Downstream({ lake, story, onOpenMap }: { lake: LakeInfo; story: Story; 
   return (
     <div className="grid gap-10 lg:grid-cols-[1fr_20rem]">
       <div>
-        <h2 className="mb-2 font-serif text-3xl">
+        <h2 data-reveal className="display mb-4 text-5xl">
           {first ? `${first.name} would have about ${first.eta_minutes} minutes.` : 'Nothing is mapped downstream yet.'}
         </h2>
-        <p className="mb-6 max-w-2xl text-ink-2">
-          If the dam failed completely, these are the places the flood reaches, in order. Warning time shrinks the further up the valley you live, which is why the slider on the map matters.
-        </p>
+        <ul data-reveal className="bullets mb-6 max-w-2xl text-ink-2">
+          <li>If the dam failed completely, these are the places the flood reaches, in order.</li>
+          <li>Warning time shrinks the closer a site sits to the lake.</li>
+          <li>That is why the temperature slider on the map matters.</li>
+        </ul>
         <EtaTable rows={e.data.assets} />
       </div>
-      <div className="panel self-start p-5">
+      <div data-reveal className="panel self-start p-5">
         <p className="eyebrow mb-1">Next</p>
-        <p className="mb-4 font-serif text-xl leading-snug">See how a warmer climate changes the picture.</p>
+        <p className="display mb-4 text-3xl">See how a warmer climate changes the picture.</p>
         <button className="btn w-full justify-center" onClick={() => onOpenMap(lake.id, story.scenarioDelta)}><MapIcon size={16} />Open the 3D map at +{story.scenarioDelta.toFixed(1)} °C</button>
       </div>
     </div>

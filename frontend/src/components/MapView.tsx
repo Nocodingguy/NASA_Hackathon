@@ -3,11 +3,8 @@ import Map, { Layer, Marker, Source, type MapRef } from 'react-map-gl/mapbox'
 import type { ExpressionSpecification } from 'mapbox-gl'
 import type { Feature, FeatureCollection, LineString, Polygon } from 'geojson'
 import 'mapbox-gl/dist/mapbox-gl.css'
-import type {
-  ExposureFeature,
-  LakeProps,
-  FloodTier
-} from '../types'
+import type { ExposureFeature, LakeProps } from '../types'
+
 
 const TOKEN = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined
 const DEFAULT_STYLE = 'mapbox://styles/mapbox/outdoors-v12'
@@ -50,7 +47,7 @@ interface Props {
   lakeNow: FeatureCollection<Polygon, LakeProps & { op: number }>
   rings: FeatureCollection<LineString, LakeProps>
   scenarioLake: Feature<Polygon> | null
-  flood: FeatureCollection<Polygon, { tier: FloodTier }> | null
+  flood: FeatureCollection<Polygon, { tier: string }> | null
   exposure: { feature: ExposureFeature; exposed: boolean }[]
   mapStyle?: string
   lakeLabel?: { name: string; lon: number; lat: number } | null
