@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { MapRef } from 'react-map-gl/mapbox'
 import type { Feature, Polygon, Position } from 'geojson'
 import MapView from './components/MapView'
@@ -6,6 +6,8 @@ import Scrubber from './components/Scrubber'
 import ActionCard from './components/ActionCard'
 import Credits from './components/Credits'
 import Detective from './detective/Detective'
+import Scrollytelling from './story/Scrollytelling'
+import { gsap, reducedMotion } from './lib/motion'
 import { useTimeline } from './hooks/useTimeline'
 import { useScenario, useSmooth } from './hooks/useScenario'
 import { loadExposure, loadLakes, loadPaths } from './lib/api'
@@ -13,6 +15,8 @@ import { YEAR_MAX, YEAR_MIN } from './lib/demoData'
 import { bufferLine, catmullRom, centroid, cumulativeKm, projectOnLine, scalePolygon, sliceLine } from './lib/geo'
 import { lakeAt } from './lib/timeline'
 import type { ExposureFeature, LakeFeature } from './types'
+
+type View = 'story' | 'detective' | 'map'
 
 const RATIO_MIN = 0.85
 const RATIO_MAX = 3.2
@@ -35,7 +39,9 @@ export default function App() {
   const [exposure, setExposure] = useState<ExposureFeature[]>([])
   const [deltaC, setDeltaC] = useState(1.5)
   const [years, setYears] = useState(30)
-  const [detectiveOpen, setDetectiveOpen] = useState(true)
+  const [view, setView] = useState<View>('story')
+  const root = useRef<HTMLDivElement>(null)
+  const curtain = useRef<HTMLDivElement>(null)
   const [creditsOpen, setCreditsOpen] = useState(false)
 
   const lakeList = useMemo(() => {
@@ -58,11 +64,35 @@ export default function App() {
     if (l) flyTo(l.center)
   }
 
+  const go = (next: View, after?: () => void) => {
+    const c = curtain.current
+    if (!c || reducedMotion()) { setView(next); after?.(); return }
+    gsap.timeline()
+      .to(c, { autoAlpha: 1, duration: 0.4, ease: 'power2.in' })
+      .add(() => { setView(next); after?.() })
+      .to(c, { autoAlpha: 0, duration: 0.8, ease: 'power2.out', delay: 0.15 })
+  }
+
+  const goMap = () => go('map', () => {
+    const l = lakeList.find(x => x.id === lakeId)
+    if (l) flyTo(l.center)
+  })
+
   const openOnMap = (id: string, delta?: number) => {
     selectLake(id)
     if (delta != null) setDeltaC(delta)
-    setDetectiveOpen(false)
+    go('map')
   }
+
+  useLayoutEffect(() => {
+    if (view !== 'map' || reducedMotion() || !root.current) return
+    const ctx = gsap.context(() => {
+      gsap.from('[data-dock="left"]', { xPercent: -14, autoAlpha: 0, duration: 1, ease: 'power3.out', delay: 0.5 })
+      gsap.from('[data-dock="right"]', { xPercent: 10, autoAlpha: 0, duration: 1, ease: 'power3.out', delay: 0.65 })
+      gsap.from('[data-dock="bottom"]', { yPercent: 40, autoAlpha: 0, duration: 1, ease: 'power3.out', delay: 0.8 })
+    }, root)
+    return () => ctx.revert()
+  }, [view])
 
   const epochYears = useMemo(
     () => lakes.filter(f => f.properties.lake_id === lakeId).map(f => f.properties.year), [lakes, lakeId])
@@ -149,34 +179,42 @@ export default function App() {
   const observedArea = useMemo(() => lakes.filter(f => f.properties.lake_id === lakeId).sort((x, y) => y.properties.year - x.properties.year)[0]?.properties.area_km2 ?? null, [lakes, lakeId])
 
   return (
-    <div className="relative h-full w-full">
+    <div ref={root} className="relative h-full w-full">
       <MapView ref={mapRef} lakeNow={now} rings={rings} scenarioLake={scenarioLake} flood={flood} exposure={exposureState} />
 
-      <div className="panel absolute left-4 top-4 w-52 p-3">
-        <h1 className="font-serif text-xl leading-none">GlacierWatch</h1>
-        <p className="eyebrow mb-3 mt-1">Lakes</p>
-        <ul className="mb-3 space-y-1">
-          {lakeList.map(l => (
-            <li key={l.id}>
-              <button onClick={() => selectLake(l.id)} aria-current={l.id === lakeId}
-                className={`w-full rounded px-2 py-1.5 text-left text-sm ${l.id === lakeId ? 'bg-ink text-paper' : 'hover:bg-paper-2'}`}>{l.label}</button>
-            </li>
-          ))}
-        </ul>
-        <div className="flex flex-col gap-1.5 border-t border-rule pt-3">
-          <button className="btn btn-quiet justify-center" onClick={() => setDetectiveOpen(true)}>Data Detective</button>
-          <button className="px-1 text-left text-xs text-ink-2 underline decoration-rule underline-offset-2 hover:text-ink" onClick={() => setCreditsOpen(true)}>Data and credits</button>
-        </div>
-      </div>
+      {view === 'map' && (
+        <>
+          <div data-dock="left" className="panel absolute left-4 top-4 w-56 p-4 max-sm:right-4 max-sm:w-auto">
+            <h1 className="display text-3xl">GlacierWatch</h1>
+            <p className="eyebrow mb-3 mt-2">Pick a lake</p>
+            <ul className="mb-4 space-y-1 max-sm:flex max-sm:flex-wrap max-sm:gap-1 max-sm:space-y-0">
+              {lakeList.map(l => (
+                <li key={l.id}>
+                  <button onClick={() => selectLake(l.id)} aria-current={l.id === lakeId}
+                    className={`w-full rounded px-2.5 py-1.5 text-left text-sm transition-colors ${l.id === lakeId ? 'bg-glacier font-semibold text-abyss' : 'text-ink hover:bg-paper-2'}`}>{l.label}</button>
+                </li>
+              ))}
+            </ul>
+            <div className="flex flex-col gap-1.5 border-t border-rule pt-3 max-sm:flex-row max-sm:flex-wrap">
+              <button className="btn btn-quiet justify-center" onClick={() => go('story')}>Replay the story</button>
+              <button className="btn btn-quiet justify-center" onClick={() => go('detective')}>Data Detective</button>
+              <button className="px-1 text-left text-xs text-ink-2 underline decoration-rule underline-offset-2 hover:text-ink" onClick={() => setCreditsOpen(true)}>Data and credits</button>
+            </div>
+          </div>
 
-      <ActionCard lakeName={lakeName} deltaC={deltaC} years={years} onDelta={setDeltaC} onYears={setYears} sim={sim.data} baseQ={sim.baseQ}
-        observedAreaKm2={observedArea} loading={sim.loading} error={sim.error}
-        exposedCount={exposureState.filter(e => e.exposed).length}
-        etaRows={dynamicEtaRows} />
-      <Scrubber t={tl.t} min={yMin} max={yMax} playing={tl.playing} areaKm2={areaKm2} onChange={tl.setT} onToggle={tl.toggle} />
+          <ActionCard lakeName={lakeName} deltaC={deltaC} years={years} onDelta={setDeltaC} onYears={setYears} sim={sim.data} baseQ={sim.baseQ}
+            observedAreaKm2={observedArea} loading={sim.loading} error={sim.error}
+            exposedCount={exposureState.filter(e => e.exposed).length}
+            etaRows={dynamicEtaRows} />
+          <Scrubber t={tl.t} min={yMin} max={yMax} playing={tl.playing} areaKm2={areaKm2} onChange={tl.setT} onToggle={tl.toggle} />
+        </>
+      )}
 
-      {detectiveOpen && <Detective lakes={lakes} onOpenMap={openOnMap} onClose={() => setDetectiveOpen(false)} />}
+      {view === 'story' && <Scrollytelling lakes={lakes} exposure={exposure} onDetective={() => go('detective')} onMap={goMap} />}
+      {view === 'detective' && <Detective lakes={lakes} onOpenMap={openOnMap} onClose={goMap} />}
       {creditsOpen && <Credits onClose={() => setCreditsOpen(false)} />}
+
+      <div ref={curtain} className="pointer-events-none invisible fixed inset-0 z-[80] bg-abyss opacity-0" />
     </div>
   )
 }

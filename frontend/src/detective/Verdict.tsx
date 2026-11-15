@@ -7,7 +7,7 @@ import TrendChart from './TrendChart'
 export function Badge({ stat }: { stat: TrendStat }) {
   const sig = stat.significant
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-sm border px-2.5 py-1 text-sm font-semibold ${sig ? 'border-moraine bg-moraine text-white' : 'border-ink-2 text-ink-2'}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-sm border px-2.5 py-1 text-sm font-semibold ${sig ? 'border-moraine bg-moraine text-abyss' : 'border-ink-2 text-ink-2'}`}>
       {sig ? <CheckCircle2 size={15} /> : <MinusCircle size={15} />}
       {sig ? 'Statistically significant (p < 0.05)' : 'Not significant (p ≥ 0.05)'}
     </span>
@@ -23,7 +23,7 @@ export default function Verdict({ v, stat, lakeName, chartHeight }: { v: Variabl
     <div className="grid gap-8 lg:grid-cols-[1fr_17rem]">
       <div>
         <div className="mb-3"><Badge stat={stat} /></div>
-        <h2 className="font-serif text-3xl leading-tight sm:text-4xl">{headline}</h2>
+        <h2 className="display text-4xl sm:text-5xl">{headline}</h2>
         <p className="mb-6 mt-3 max-w-2xl text-base leading-relaxed text-ink-2">{body}</p>
         <TrendChart stat={stat} v={v} height={chartHeight} />
       </div>
@@ -33,15 +33,20 @@ export default function Verdict({ v, stat, lakeName, chartHeight }: { v: Variabl
         <Stat k="Chance it is just noise" v={fmtP(stat.p_value)} sub="below 0.05 counts as significant" />
         <Stat k="Record" v={`${from} to ${to}`} sub={`${n} full years used`} />
         <div>
-          <p className="eyebrow mb-1">What you are looking at</p>
-          <p className="text-sm text-ink-2">{v.code}: {v.how.toLowerCase()}. {v.read}</p>
+          <p className="eyebrow mb-2">What you are looking at</p>
+          <ul className="bullets text-sm text-ink-2">
+            <li>{v.code}: {v.how.toLowerCase()}.</li>
+            <li>{v.read}</li>
+          </ul>
         </div>
         <details className="text-sm">
           <summary className="cursor-pointer font-medium">How the test works</summary>
-          <p className="mt-2 text-ink-2">
-            Modified Mann-Kendall (Hamed-Rao), which corrects for years that echo each other. The dashed line is the Theil-Sen slope. Years with more than about 65 missing days are dropped.
-            z = <span className="num">{stat.z.toFixed(2)}</span>.
-          </p>
+          <ul className="bullets mt-2 text-ink-2">
+            <li>Modified Mann-Kendall (Hamed-Rao), which corrects for years that echo each other.</li>
+            <li>The dashed line is the Theil-Sen slope.</li>
+            <li>Years with more than about 65 missing days are dropped.</li>
+            <li>z = <span className="num">{stat.z.toFixed(2)}</span></li>
+          </ul>
         </details>
       </aside>
     </div>

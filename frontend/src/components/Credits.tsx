@@ -13,9 +13,11 @@ const ROWS: [string, string, string][] = [
 export default function Credits({ onClose }: { onClose: () => void }) {
   return (
     <Modal title="Data and credits" onClose={onClose}>
-      <p className="mb-5 text-sm text-ink-2">
-        Everything on screen is built from open data. Peak flow uses Froehlich's dam-breach relations, and the risk rating is a weighted hazard, exposure and vulnerability score (AHP).
-      </p>
+      <ul className="bullets mb-5 text-sm text-ink-2">
+        <li>Everything on screen is built from open data.</li>
+        <li>Peak flow uses Froehlich's dam-breach relations.</li>
+        <li>The risk rating is a weighted hazard, exposure and vulnerability score (AHP).</li>
+      </ul>
       <dl className="divide-y divide-rule border-y border-rule">
         {ROWS.map(([name, use, credit]) => (
           <div key={name} className="py-3">
@@ -25,10 +27,14 @@ export default function Credits({ onClose }: { onClose: () => void }) {
           </div>
         ))}
       </dl>
-      <p className="mt-5 text-xs text-ink-2">
-        This is a susceptibility screening tool made during a 48-hour hackathon. Several model inputs (glacier area, debris fraction, dam condition) are placeholders and are listed in
-        <code className="num mx-1 rounded bg-paper-2 px-1">backend/app/config.py</code>. It is not a forecast and not a substitute for field surveys.
-      </p>
+      <ul className="bullets mt-5 text-xs text-ink-2">
+        <li>This is a susceptibility screening tool made during a 48-hour hackathon.</li>
+        <li>
+          Several model inputs (glacier area, debris fraction, dam condition) are placeholders and are listed in
+          <code className="num mx-1 rounded bg-paper-2 px-1">backend/app/config.py</code>.
+        </li>
+        <li>It is not a forecast and not a substitute for field surveys.</li>
+      </ul>
     </Modal>
   )
 }

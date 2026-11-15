@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, BookOpen, Info, Map as MapIcon } from 'lucide-react'
 import type { LakeFeature } from '../types'
 import { getTrends } from '../lib/api'
@@ -10,6 +10,7 @@ import Verdict from './Verdict'
 import { Failed, Loading } from './Status'
 import Glossary from '../components/Glossary'
 import Credits from '../components/Credits'
+import { useStagger } from '../lib/motion'
 
 interface Props { lakes: LakeFeature[]; onOpenMap: (lakeId: string, delta?: number) => void; onClose: () => void }
 
@@ -24,14 +25,17 @@ export default function Detective({ lakes, onOpenMap, onClose }: Props) {
   const [beat, setBeat] = useState(0)
   const [modal, setModal] = useState<'glossary' | 'credits' | null>(null)
 
+  const main = useRef<HTMLElement>(null)
+  useStagger(main, '[data-reveal]', [step, story?.id, beat, lakeId], { y: 22, stagger: 0.07, delay: 0.05 })
+
   const lake = infos.find(l => l.id === (story ? story.lakeId : lakeId)) ?? null
 
   return (
-    <div className="fixed inset-0 z-40 overflow-y-auto bg-paper">
-      <header className="sticky top-0 z-10 border-b border-rule bg-paper/95 backdrop-blur-sm">
+    <div className="fixed inset-0 z-40 overflow-y-auto bg-abyss">
+      <header className="sticky top-0 z-10 border-b border-rule bg-abyss/90 backdrop-blur-sm">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-3">
           <div className="flex items-baseline gap-3">
-            <span className="font-serif text-2xl font-medium">GlacierWatch</span>
+            <span className="display text-3xl">GlacierWatch</span>
             <span className="hidden text-sm text-ink-2 sm:inline">Himalayan glacial lakes, read from the data</span>
           </div>
           <nav className="flex items-center gap-1 text-sm">
@@ -42,7 +46,7 @@ export default function Detective({ lakes, onOpenMap, onClose }: Props) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-5 pb-24 pt-10">
+      <main ref={main} className="mx-auto max-w-5xl px-5 pb-24 pt-10">
         {story && lake ? (
           <StoryRunner story={story} lake={lake} beat={beat} setBeat={setBeat} onExit={() => { setStory(null); setStep(1) }}
             onOpenMap={(id, d) => onOpenMap(id, d)} />
@@ -64,18 +68,20 @@ export default function Detective({ lakes, onOpenMap, onClose }: Props) {
 
             {step === 1 && (
               <>
-                <h1 className="mb-2 font-serif text-4xl">Which lake do you want to look into?</h1>
-                <p className="mb-8 max-w-2xl text-ink-2">
-                  The hazard here is a glacial lake outburst flood: a lake held back by loose rock and ice, and the water that comes down the valley if that wall fails. Pick a lake and we will check whether its climate is really changing.
-                </p>
+                <h1 data-reveal className="display mb-5 text-[clamp(2.6rem,6vw,4.6rem)]">Which lake do you want to look into?</h1>
+                <ul data-reveal className="bullets mb-10 max-w-2xl text-ink-2">
+                  <li>A glacial lake outburst flood happens when the wall holding a lake back fails.</li>
+                  <li>The wall is usually loose rock and ice left behind by the glacier.</li>
+                  <li>Pick a lake and we will check whether its climate is really changing.</li>
+                </ul>
                 <ul className="border-t border-ink">
                   {infos.map(l => {
                     const a = l.epochs[0], b = l.epochs[l.epochs.length - 1]
                     return (
-                      <li key={l.id} className="border-b border-rule">
+                      <li key={l.id} data-reveal className="border-b border-rule">
                         <button onClick={() => { setLakeId(l.id); setStep(2) }} className="group flex w-full items-center justify-between gap-4 py-5 text-left hover:bg-paper-2">
                           <span>
-                            <span className="block font-serif text-2xl">{l.name}</span>
+                            <span className="display block text-3xl">{l.name}</span>
                             <span className="text-sm text-ink-2">{l.region}{l.elevation ? ` · ${l.elevation.toLocaleString()} m` : ''}</span>
                           </span>
                           <span className="flex items-center gap-4">
@@ -88,13 +94,13 @@ export default function Detective({ lakes, onOpenMap, onClose }: Props) {
                   })}
                 </ul>
 
-                <div className="mt-14">
+                <div data-reveal className="mt-14">
                   <p className="eyebrow mb-3">Or take a guided case</p>
                   <div className="grid gap-4 md:grid-cols-2">
                     {STORIES.map(s => (
                       <button key={s.id} onClick={() => { setStory(s); setBeat(0) }} className="panel p-5 text-left shadow-none transition-colors hover:bg-paper-2">
                         <span className="eyebrow">{s.kicker}</span>
-                        <span className="mb-1 mt-1 block font-serif text-2xl leading-tight">{s.title}</span>
+                        <span className="display mb-1 mt-1 block text-3xl">{s.title}</span>
                         <span className="block text-sm text-ink-2">{s.intro}</span>
                       </button>
                     ))}
@@ -105,16 +111,16 @@ export default function Detective({ lakes, onOpenMap, onClose }: Props) {
 
             {step === 2 && lake && (
               <>
-                <p className="eyebrow">{lake.name}</p>
-                <h1 className="mb-2 font-serif text-4xl">What do you want to measure?</h1>
-                <p className="mb-8 max-w-2xl text-ink-2">Both come from NASA's POWER record, one value per day for 40 years. Pick one and we will test it.</p>
+                <p data-reveal className="eyebrow">{lake.name}</p>
+                <h1 data-reveal className="display mb-3 text-[clamp(2.6rem,6vw,4.6rem)]">What do you want to measure?</h1>
+                <p data-reveal className="mb-8 max-w-2xl text-ink-2">Both come from NASA's POWER record, one value per day for 40 years. Pick one and we will test it.</p>
                 <div className="grid gap-4 md:grid-cols-2">
                   {(Object.keys(VARIABLES) as VarKey[]).map(k => {
                     const v = VARIABLES[k]
                     return (
-                      <button key={k} onClick={() => { setVarKey(k); setStep(3) }} className="panel group p-6 text-left shadow-none hover:bg-paper-2">
+                      <button key={k} data-reveal onClick={() => { setVarKey(k); setStep(3) }} className="panel group p-6 text-left shadow-none hover:bg-paper-2">
                         <span className="num text-xs text-ink-2">{v.code}</span>
-                        <span className="mb-2 block font-serif text-3xl">{v.name}</span>
+                        <span className="display mb-2 block text-4xl">{v.name}</span>
                         <span className="mb-3 block">{v.plain}</span>
                         <span className="block text-sm text-ink-2">{v.why}</span>
                         <span className="mt-4 flex items-center gap-1.5 text-sm font-semibold text-glacier">Test it <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" /></span>
