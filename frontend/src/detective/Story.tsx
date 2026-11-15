@@ -16,12 +16,12 @@ export default function StoryRunner({ story, lake, beat, setBeat, onExit, onOpen
   return (
     <div>
       <p data-reveal className="eyebrow">{story.kicker}</p>
-      <h1 data-reveal className="display mb-1 text-[clamp(2.6rem,6vw,4.6rem)]">{story.title}</h1>
-      <ol className="mb-8 mt-4 flex gap-6 border-b border-rule text-sm">
+      <h1 data-split className="display mb-1 text-[clamp(2.6rem,6vw,4.8rem)]">{story.title}</h1>
+      <ol className="mb-10 mt-6 flex gap-8 text-xs uppercase tracking-[0.16em]">
         {BEATS.map((b, i) => (
           <li key={b}>
-            <button onClick={() => setBeat(i)} className={`-mb-px border-b-2 pb-2 ${i === beat ? 'border-ink font-semibold' : 'border-transparent text-ink-2 hover:text-ink'}`}>
-              <span className="num mr-1.5 text-xs">{i + 1}</span>{b}
+            <button onClick={() => setBeat(i)} className={`border-t pt-3 transition-colors duration-300 ${i === beat ? 'border-glacier text-ink' : 'border-rule text-ink-2 hover:text-ink'}`}>
+              <span className="num mr-2 text-glacier">{String(i + 1).padStart(2, '0')}</span>{b}
             </button>
           </li>
         ))}
@@ -29,14 +29,14 @@ export default function StoryRunner({ story, lake, beat, setBeat, onExit, onOpen
 
       {beat === 0 && (
         <div className="grid gap-10 md:grid-cols-2">
-          <p data-reveal className="font-serif text-3xl leading-snug">{story.intro}</p>
+          <p data-reveal className="lede font-serif text-3xl leading-snug text-ink/90">{story.intro}</p>
           <LakeFacts lake={lake} />
         </div>
       )}
       {beat === 1 && <Climate story={story} lake={lake} />}
       {beat === 2 && <Downstream lake={lake} story={story} onOpenMap={onOpenMap} />}
 
-      <div className="mt-10 flex items-center justify-between border-t border-rule pt-4">
+      <div className="mt-12 flex items-center justify-between border-t border-white/10 pt-6">
         <button className="btn btn-quiet" onClick={beat === 0 ? onExit : () => setBeat(beat - 1)}><ArrowLeft size={16} />{beat === 0 ? 'All cases' : 'Back'}</button>
         {beat < 2 && <button className="btn" onClick={() => setBeat(beat + 1)}>{BEATS[beat + 1]}<ArrowRight size={16} /></button>}
       </div>
@@ -63,7 +63,7 @@ function Downstream({ lake, story, onOpenMap }: { lake: LakeInfo; story: Story; 
   return (
     <div className="grid gap-10 lg:grid-cols-[1fr_20rem]">
       <div>
-        <h2 data-reveal className="display mb-4 text-5xl">
+        <h2 data-split className="display mb-5 text-5xl">
           {first ? `${first.name} would have about ${first.eta_minutes} minutes.` : 'Nothing is mapped downstream yet.'}
         </h2>
         <ul data-reveal className="bullets mb-6 max-w-2xl text-ink-2">
@@ -73,7 +73,7 @@ function Downstream({ lake, story, onOpenMap }: { lake: LakeInfo; story: Story; 
         </ul>
         <EtaTable rows={e.data.assets} />
       </div>
-      <div data-reveal className="panel self-start p-5">
+      <div data-reveal className="panel self-start p-6">
         <p className="eyebrow mb-1">Next</p>
         <p className="display mb-4 text-3xl">See how a warmer climate changes the picture.</p>
         <button className="btn w-full justify-center" onClick={() => onOpenMap(lake.id, story.scenarioDelta)}><MapIcon size={16} />Open the 3D map at +{story.scenarioDelta.toFixed(1)} °C</button>

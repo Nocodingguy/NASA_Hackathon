@@ -1,13 +1,13 @@
 import { API } from '../lib/api'
 
 export function Loading({ what }: { what: string }) {
-  return <p className="py-16 text-center text-ink-2">Loading {what}…</p>
+  return <p className="animate-pulse py-20 text-center text-sm tracking-wide text-ink-2">Loading {what}</p>
 }
 
 export function Failed({ message }: { message: string }) {
   const unreachable = message.startsWith('Could not reach')
   return (
-    <div className="my-8 max-w-xl border-l-4 border-r-vhigh bg-paper-2 p-4">
+    <div className="my-8 max-w-xl rounded-lg border border-r-vhigh/30 border-l-2 border-l-r-vhigh bg-paper-2/70 p-5">
       <p className="font-medium">{message}</p>
       {unreachable && (
         <p className="mt-2 text-sm text-ink-2">

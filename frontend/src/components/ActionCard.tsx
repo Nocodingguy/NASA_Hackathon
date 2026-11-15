@@ -59,12 +59,12 @@ export default function ActionCard({ lakeName, deltaC, years, onDelta, onYears, 
   const rows = (etaRows && etaRows.length ? etaRows : d?.eta_table ?? []).slice(0, 6)
   const points = useMemo(() => (sim ? actionPoints(sim.action) : []), [sim?.action])
 
-  useStagger(body, '[data-point]', [sim?.action], { y: 10, stagger: 0.08 })
+  useStagger(body, '[data-point]', [sim?.action], { y: 12, stagger: 0.09 })
 
   return (
-    <aside data-dock="right" className="panel absolute right-4 top-4 flex max-h-[calc(100vh-9.5rem)] w-[388px] max-w-[calc(100vw-2rem)] flex-col overflow-y-auto p-6 max-sm:inset-x-3 max-sm:bottom-3 max-sm:top-auto max-sm:max-h-[52vh] max-sm:w-auto">
+    <aside className="panel flex max-h-[calc(100vh-9.5rem)] w-[388px] max-w-[calc(100vw-2rem)] flex-col overflow-y-auto p-6 max-sm:max-h-[52vh] max-sm:w-auto">
       <p className="eyebrow">What if it gets warmer?</p>
-      <h2 className="display mb-5 mt-1 text-4xl">{lakeName}</h2>
+      <h2 className="display mb-6 mt-1 pr-8 text-4xl">{lakeName.replace(/\s*\(.*\)/, '')}</h2>
 
       <div className="mb-1 flex items-baseline justify-between">
         <label htmlFor="dt" className="text-sm font-medium">Air temperature rise</label>
@@ -79,14 +79,14 @@ export default function ActionCard({ lakeName, deltaC, years, onDelta, onYears, 
       </div>
       <input id="yrs" className="track mb-4" style={fill(years, 5, 50)} type="range" min={5} max={50} step={5} value={years} onChange={e => onYears(parseInt(e.target.value))} />
 
-      {!sim && loading && <p className="border-t border-rule py-6 text-center text-sm text-ink-2">Running the scenario…</p>}
+      {!sim && loading && <p className="animate-pulse border-t border-ink/10 py-6 text-center text-sm text-ink-2">Running the scenario</p>}
       {error && <p className="mb-2 rounded border border-r-high/40 bg-paper-2 p-2 text-xs">{error}</p>}
 
       {sim && d && (
-        <div ref={body} className={`border-t border-rule pt-4 transition-opacity ${loading ? 'opacity-60' : ''}`}>
+        <div ref={body} className={`border-t border-ink/10 pt-5 transition-opacity ${loading ? 'opacity-60' : ''}`}>
           <RiskGauge score={d.score} rating={d.rating} bands={bands} />
 
-          <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-4">
+          <dl className="mt-6 grid grid-cols-2 gap-x-4 gap-y-5">
             <Fig k="Peak flood flow" sub={vsToday != null ? `${vsToday >= 0 ? '+' : ''}${vsToday}% vs today` : undefined}>
               <Num value={q!} format={n => Math.round(n).toLocaleString()} /> <small className="text-xs font-medium text-ink-2">m³/s</small>
             </Fig>
@@ -102,7 +102,7 @@ export default function ActionCard({ lakeName, deltaC, years, onDelta, onYears, 
             </Fig>
           </dl>
 
-          <h3 className="mb-2 mt-6 font-serif text-2xl">Downstream, first to last</h3>
+          <p className="eyebrow mb-2 mt-7">Downstream, first to last</p>
           <EtaTable rows={rows} compact />
           <ul className="bullets mt-3 text-xs text-ink-2">
             <li>Sites listed are the ones the red flood band on the map reaches.</li>
@@ -110,8 +110,8 @@ export default function ActionCard({ lakeName, deltaC, years, onDelta, onYears, 
             <li>Bar length shows warning time. Arrival times come from the wave-travel model and stay fixed for each site.</li>
           </ul>
 
-          <div className="mt-6 rounded-md border border-moraine/50 bg-moraine/10 p-4">
-            <h3 className="font-serif text-2xl text-moraine">What officials should do</h3>
+          <div className="mt-6 rounded-xl border border-moraine/30 bg-gradient-to-b from-moraine/15 to-moraine/5 p-5">
+            <p className="eyebrow text-moraine">What officials should do</p>
             <ul className="bullets bullets-flood mt-3 text-sm">
               {points.map(p => <li key={p} data-point>{p}</li>)}
             </ul>

@@ -1,4 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { BookOpen, Clock, Compass, Mountain, SlidersHorizontal } from 'lucide-react'
+import Dock from './components/Dock'
 import type { MapRef } from 'react-map-gl/mapbox'
 import type { Feature, Polygon, Position } from 'geojson'
 import MapView from './components/MapView'
@@ -51,7 +53,8 @@ export default function App() {
       if (!cur || f.properties.year > cur.properties.year) byId.set(f.properties.lake_id, f)
     }
     return [...byId.entries()].map(([id, f]) => ({
-      id, label: f.properties.lake_name ?? id, center: centroid(f.geometry) as [number, number]
+      id, label: (f.properties.lake_name ?? id).replace(/\s*\(.*\)/, ''), sub: f.properties.elevation_m ? `${f.properties.elevation_m.toLocaleString()} m` : '',
+      center: centroid(f.geometry) as [number, number]
     }))
   }, [lakes])
 
@@ -87,9 +90,11 @@ export default function App() {
   useLayoutEffect(() => {
     if (view !== 'map' || reducedMotion() || !root.current) return
     const ctx = gsap.context(() => {
-      gsap.from('[data-dock="left"]', { xPercent: -14, autoAlpha: 0, duration: 1, ease: 'power3.out', delay: 0.5 })
-      gsap.from('[data-dock="right"]', { xPercent: 10, autoAlpha: 0, duration: 1, ease: 'power3.out', delay: 0.65 })
-      gsap.from('[data-dock="bottom"]', { yPercent: 40, autoAlpha: 0, duration: 1, ease: 'power3.out', delay: 0.8 })
+      const tl = gsap.timeline({ defaults: { ease: 'expo.out', duration: 1.4 }, delay: 0.45 })
+      tl.from('[data-dock="left"]', { xPercent: -10, autoAlpha: 0 })
+        .from('[data-lake-item]', { autoAlpha: 0, x: -12, duration: 0.8, stagger: 0.07 }, 0.25)
+        .from('[data-dock="right"]', { xPercent: 8, autoAlpha: 0 }, 0.15)
+        .from('[data-dock="bottom"]', { yPercent: 30, autoAlpha: 0 }, 0.3)
     }, root)
     return () => ctx.revert()
   }, [view])
@@ -103,7 +108,6 @@ export default function App() {
 
   useEffect(() => { loadLakes().then(c => setLakes(c.features)); loadPaths().then(setPaths); loadExposure().then(setExposure) }, [])
   useEffect(() => { if (!lakeId && lakeList.length) setLakeId(lakeList[0].id) }, [lakeList, lakeId])
-  useEffect(() => { console.log('lakes in data:', lakeList.map(l => l.id)) }, [lakeList])
 
   const sim = useScenario(lakeId, deltaC, years)
   const { now, rings, areaKm2 } = useMemo(() => lakeAt(lakes, lakeId, tl.t), [lakes, lakeId, tl.t])
@@ -184,29 +188,38 @@ export default function App() {
 
       {view === 'map' && (
         <>
-          <div data-dock="left" className="panel absolute left-4 top-4 w-56 p-4 max-sm:right-4 max-sm:w-auto">
-            <h1 className="display text-3xl">GlacierWatch</h1>
-            <p className="eyebrow mb-3 mt-2">Pick a lake</p>
-            <ul className="mb-4 space-y-1 max-sm:flex max-sm:flex-wrap max-sm:gap-1 max-sm:space-y-0">
+          <Dock side="left" label="Lakes" icon={<Mountain size={15} />} className="absolute left-4 top-4 max-sm:right-4">
+          <div className="panel w-60 p-5 max-sm:w-auto">
+            <h1 className="display pr-7 text-3xl">GlacierWatch</h1>
+            <p className="eyebrow mb-3 mt-5">Glacial lakes</p>
+            <ul className="mb-5 space-y-1 max-sm:flex max-sm:flex-wrap max-sm:gap-1 max-sm:space-y-0">
               {lakeList.map(l => (
-                <li key={l.id}>
+                <li key={l.id} data-lake-item>
                   <button onClick={() => selectLake(l.id)} aria-current={l.id === lakeId}
-                    className={`w-full rounded px-2.5 py-1.5 text-left text-sm transition-colors ${l.id === lakeId ? 'bg-glacier font-semibold text-abyss' : 'text-ink hover:bg-paper-2'}`}>{l.label}</button>
+                    className={`flex w-full items-baseline justify-between rounded-lg border-l-2 px-3 py-2 text-left text-sm transition-all duration-300 ${l.id === lakeId ? 'border-glacier bg-glacier/10 font-semibold text-ink' : 'border-transparent text-ink-2 hover:bg-ink/5 hover:text-ink'}`}>
+                    <span>{l.label}</span>
+                    <span className="num text-[11px] font-normal text-ink-2">{l.sub}</span>
+                  </button>
                 </li>
               ))}
             </ul>
-            <div className="flex flex-col gap-1.5 border-t border-rule pt-3 max-sm:flex-row max-sm:flex-wrap">
-              <button className="btn btn-quiet justify-center" onClick={() => go('story')}>Replay the story</button>
-              <button className="btn btn-quiet justify-center" onClick={() => go('detective')}>Data Detective</button>
-              <button className="px-1 text-left text-xs text-ink-2 underline decoration-rule underline-offset-2 hover:text-ink" onClick={() => setCreditsOpen(true)}>Data and credits</button>
-            </div>
+            <div className="hairline mb-3" />
+            <ul className="flex flex-col gap-0.5 text-sm max-sm:flex-row max-sm:flex-wrap">
+              <li><button className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-ink-2 transition-colors hover:bg-ink/5 hover:text-ink" onClick={() => go('detective')}><Compass size={14} />Data Detective</button></li>
+              <li><button className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-ink-2 transition-colors hover:bg-ink/5 hover:text-ink" onClick={() => setCreditsOpen(true)}><BookOpen size={14} />Data and credits</button></li>
+            </ul>
           </div>
+          </Dock>
 
+          <Dock side="right" label="Scenario" icon={<SlidersHorizontal size={15} />} className="absolute right-4 top-4 max-sm:inset-x-3 max-sm:bottom-3 max-sm:top-auto">
           <ActionCard lakeName={lakeName} deltaC={deltaC} years={years} onDelta={setDeltaC} onYears={setYears} sim={sim.data} baseQ={sim.baseQ}
             observedAreaKm2={observedArea} loading={sim.loading} error={sim.error}
             exposedCount={exposureState.filter(e => e.exposed).length}
             etaRows={dynamicEtaRows} />
+          </Dock>
+          <Dock side="bottom" label="Timeline" icon={<Clock size={15} />} className="absolute inset-x-0 bottom-4 mx-auto w-[min(720px,calc(100vw-2rem))] max-sm:hidden">
           <Scrubber t={tl.t} min={yMin} max={yMax} playing={tl.playing} areaKm2={areaKm2} onChange={tl.setT} onToggle={tl.toggle} />
+          </Dock>
         </>
       )}
 

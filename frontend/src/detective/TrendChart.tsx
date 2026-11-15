@@ -15,14 +15,14 @@ export default function TrendChart({ stat, v, height = 320 }: { stat: TrendStat;
     <div role="img" aria-label={`${v.name} by year with fitted trend line`}>
       <ResponsiveContainer width="100%" height={height}>
         <ComposedChart data={rows} margin={{ top: 8, right: 12, bottom: 4, left: 0 }}>
-          <CartesianGrid stroke="var(--color-rule)" vertical={false} />
-          <XAxis dataKey="year" tick={{ fontSize: 11, fill: 'var(--color-ink-2)' }} tickLine={false} axisLine={{ stroke: 'var(--color-ink)' }} minTickGap={24} />
+          <CartesianGrid stroke="var(--color-rule)" strokeOpacity={0.55} vertical={false} />
+          <XAxis dataKey="year" tick={{ fontSize: 11, fill: 'var(--color-ink-2)' }} tickLine={false} axisLine={{ stroke: 'var(--color-rule)' }} minTickGap={24} />
           <YAxis domain={[lo - pad, hi + pad]} tickFormatter={(x: number) => x.toFixed(digits)} width={44}
             tick={{ fontSize: 11, fill: 'var(--color-ink-2)' }} tickLine={false} axisLine={false} />
           <Tooltip content={<Tip v={v} digits={digits} />} cursor={{ stroke: 'var(--color-ink-2)', strokeDasharray: '2 3' }} />
           <Area dataKey="band" stroke="none" fill="var(--color-moraine)" fillOpacity={0.14} isAnimationActive={false} activeDot={false} />
-          <Line dataKey="value" stroke="var(--color-glacier)" strokeWidth={1.75} dot={{ r: 2.5, fill: 'var(--color-glacier)', strokeWidth: 0 }} activeDot={{ r: 4 }} isAnimationActive={false} />
-          <Line dataKey="trend" stroke="var(--color-moraine)" strokeWidth={2} strokeDasharray="6 4" dot={false} activeDot={false} isAnimationActive={false} />
+          <Line dataKey="value" stroke="var(--color-glacier)" strokeWidth={2} dot={{ r: 2, fill: 'var(--color-glacier)', strokeWidth: 0 }} activeDot={{ r: 4.5, strokeWidth: 0 }} isAnimationActive animationDuration={1600} animationEasing="ease-out" />
+          <Line dataKey="trend" stroke="var(--color-moraine)" strokeWidth={2} strokeDasharray="6 4" dot={false} activeDot={false} isAnimationActive animationBegin={900} animationDuration={1200} animationEasing="ease-out" />
         </ComposedChart>
       </ResponsiveContainer>
       <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-ink-2">

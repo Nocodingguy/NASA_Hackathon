@@ -18,7 +18,7 @@ export default function Credits({ onClose }: { onClose: () => void }) {
         <li>Peak flow uses Froehlich's dam-breach relations.</li>
         <li>The risk rating is a weighted hazard, exposure and vulnerability score (AHP).</li>
       </ul>
-      <dl className="divide-y divide-rule border-y border-rule">
+      <dl className="divide-y divide-white/10 border-y border-white/10">
         {ROWS.map(([name, use, credit]) => (
           <div key={name} className="py-3">
             <dt className="font-semibold">{name}</dt>

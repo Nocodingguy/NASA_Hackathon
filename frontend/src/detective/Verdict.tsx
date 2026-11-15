@@ -7,7 +7,7 @@ import TrendChart from './TrendChart'
 export function Badge({ stat }: { stat: TrendStat }) {
   const sig = stat.significant
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-sm border px-2.5 py-1 text-sm font-semibold ${sig ? 'border-moraine bg-moraine text-abyss' : 'border-ink-2 text-ink-2'}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold tracking-wide ${sig ? 'border-moraine/60 bg-moraine/15 text-moraine' : 'border-white/15 text-ink-2'}`}>
       {sig ? <CheckCircle2 size={15} /> : <MinusCircle size={15} />}
       {sig ? 'Statistically significant (p < 0.05)' : 'Not significant (p ≥ 0.05)'}
     </span>
@@ -22,12 +22,12 @@ export default function Verdict({ v, stat, lakeName, chartHeight }: { v: Variabl
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_17rem]">
       <div>
-        <div className="mb-3"><Badge stat={stat} /></div>
-        <h2 className="display text-4xl sm:text-5xl">{headline}</h2>
-        <p className="mb-6 mt-3 max-w-2xl text-base leading-relaxed text-ink-2">{body}</p>
-        <TrendChart stat={stat} v={v} height={chartHeight} />
+        <div data-reveal className="mb-4"><Badge stat={stat} /></div>
+        <h2 key={headline} data-split className="display text-4xl sm:text-5xl">{headline}</h2>
+        <p data-reveal className="lede mb-8 mt-4 max-w-2xl text-base leading-relaxed text-ink-2">{body}</p>
+        <div data-reveal><TrendChart stat={stat} v={v} height={chartHeight} /></div>
       </div>
-      <aside className="space-y-5 lg:border-l lg:border-rule lg:pl-6">
+      <aside data-reveal className="space-y-6 lg:border-l lg:border-white/10 lg:pl-7">
         <Stat k="Rate of change" v={`${stat.slope_per_yr * 10 >= 0 ? '+' : '−'}${Math.abs(stat.slope_per_yr * 10).toFixed(dp)} ${v.unit} per decade`}
           sub={`95% range ${lo.toFixed(dp)} to ${hi.toFixed(dp)}`} />
         <Stat k="Chance it is just noise" v={fmtP(stat.p_value)} sub="below 0.05 counts as significant" />
@@ -56,7 +56,7 @@ export default function Verdict({ v, stat, lakeName, chartHeight }: { v: Variabl
 const Stat = ({ k, v, sub }: { k: string; v: string; sub: string }) => (
   <div>
     <p className="eyebrow">{k}</p>
-    <p className="num text-lg font-medium">{v}</p>
+    <p className="num mt-0.5 text-xl font-semibold">{v}</p>
     <p className="text-xs text-ink-2">{sub}</p>
   </div>
 )
