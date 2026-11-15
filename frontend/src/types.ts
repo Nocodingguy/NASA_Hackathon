@@ -1,10 +1,8 @@
 import type { Feature, FeatureCollection, Polygon, Point } from 'geojson'
 
-/** Member 1 contract: one polygon Feature per lake per year. */
-export interface LakeProps { lake_id: string; lake_name?: string; year: number; area_km2: number }
+export interface LakeProps { lake_id: string; lake_name?: string; region?: string; elevation_m?: number; year: number; area_km2: number }
 export type LakeFeature = Feature<Polygon, LakeProps>
 
-/** One downstream flood-path polygon per lake (baseline discharge). */
 export interface FloodProps { lake_id: string; origin: [number, number]; tier?: string }
 export type FloodFeature = Feature<Polygon, FloodProps>
 
@@ -13,15 +11,54 @@ export type ExposureFeature = Feature<Point, ExposureProps>
 
 export type LakeCollection = FeatureCollection<Polygon, LakeProps>
 
+export type Rating = 'Low' | 'Moderate' | 'High' | 'Very High'
 
+export interface EtaRow {
+  name: string; asset_type: string; eta_minutes: number | null; distance_km: number | null; criticality: string
+}
 
-/** Subset of the Python /api/simulate response used by the UI. */
+type AreaVol = { new_area_km2: number; new_volume_mcm: number; added_volume_m3: number }
+
 export interface SimResponse {
-  melt: { new_area_km2: number; new_volume_m3: number; area_change_pct: number; added_volume_total_m3: number }
-  risk_baseline: { rating: Rating; risk_score: number; breach?: { q_peak_m3s: number } }
-  risk_scenario: {
-    rating: Rating; risk_score: number; directives: string[]
-    breach: { q_peak_m3s: number; breach_time_h: number; avg_breach_width_m: number }
+  lake_id: string
+  melt_pct: number
+  new_area_km2: number
+  new_volume_mcm: number
+  added_volume_m3: number
+  peak_discharge_m3s: number
+  risk: Rating
+  action: string
+  disclaimer: string
+  details: { scenarios: Record<'low' | 'central' | 'high', AreaVol> }
+  risk_detail: {
+    rating: Rating
+    score: number
+    components: { hazard: number; exposure: number; vulnerability: number }
+    breach: { peak_discharge_m3s: number; breach_time_h: number; avg_breach_width_m: number; breach_height_m: number; mode: string; height_source: string }
+    eta_table: EtaRow[]
   }
 }
-export type Rating = 'Low' | 'Moderate' | 'High' | 'Very High'
+
+export interface TrendStat {
+  trend: 'increasing' | 'decreasing' | 'no trend'
+  p_value: number
+  z: number
+  slope_per_yr: number
+  slope_ci: [number, number]
+  significant: boolean
+  verdict: string
+  series: { year: number; value: number }[]
+}
+export interface TrendsResponse { lake_id: string; t2m: TrendStat; precip: TrendStat }
+
+export interface ExposureResponse {
+  lake_id: string
+  assets: (EtaRow & { asset_id: string; threat_tier: string; residents: number | null; details: string })[]
+  summary: { n_assets: number; min_eta_minutes: number | null; residents_known: number | null; population_note: string }
+}
+
+export interface MetaResponse {
+  disclaimer: string
+  data_sources: string[]
+  assumptions: { rating_thresholds: [number, string][] } & Record<string, unknown>
+}

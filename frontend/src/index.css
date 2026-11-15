@@ -1,2 +1,57 @@
 @import "tailwindcss";
+
+@theme {
+  --color-paper: #f4f0e6;
+  --color-paper-2: #ebe5d6;
+  --color-ink: #1b2a2e;
+  --color-ink-2: #51636a;
+  --color-rule: #d5cdb9;
+  --color-glacier: #276b7a;
+  --color-glacier-dark: #1b4f5b;
+  --color-moraine: #a8512b;
+  --color-r-low: #4d7a5a;
+  --color-r-mod: #c19a2b;
+  --color-r-high: #cb6a2c;
+  --color-r-vhigh: #a1312b;
+  --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
 html, body, #root { height: 100%; }
+body { font-family: var(--font-sans); color: var(--color-ink); }
+
+@layer components {
+.panel {
+  background: var(--color-paper);
+  border: 1px solid var(--color-rule);
+  border-radius: 6px;
+  box-shadow: 0 1px 0 rgba(27, 42, 46, 0.06), 0 8px 24px rgba(8, 20, 24, 0.28);
+  color: var(--color-ink);
+}
+.eyebrow { font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--color-ink-2); font-weight: 600; }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.btn {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.5rem 0.9rem; border-radius: 4px; font-size: 0.875rem; font-weight: 600;
+  background: var(--color-glacier); color: #fff; cursor: pointer; transition: background .15s;
+}
+.btn:hover { background: var(--color-glacier-dark); }
+.btn-quiet { background: transparent; color: var(--color-ink); border: 1px solid var(--color-rule); }
+.btn-quiet:hover { background: var(--color-paper-2); }
+:focus-visible { outline: 2px solid var(--color-glacier); outline-offset: 2px; }
+}
+
+input[type="range"].track {
+  -webkit-appearance: none; appearance: none; width: 100%; height: 22px; background: transparent; cursor: pointer;
+}
+input[type="range"].track::-webkit-slider-runnable-track { height: 3px; background: var(--color-ink); border-radius: 2px; }
+input[type="range"].track::-moz-range-track { height: 3px; background: var(--color-ink); border-radius: 2px; }
+input[type="range"].track::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px; margin-top: -6.5px; border-radius: 50%;
+  background: var(--color-moraine); border: 2px solid var(--color-paper); box-shadow: 0 0 0 1px var(--color-ink);
+}
+input[type="range"].track::-moz-range-thumb {
+  width: 12px; height: 12px; border-radius: 50%; background: var(--color-moraine);
+  border: 2px solid var(--color-paper); box-shadow: 0 0 0 1px var(--color-ink);
+}

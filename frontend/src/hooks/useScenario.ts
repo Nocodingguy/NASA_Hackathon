@@ -1,29 +1,32 @@
 import { useEffect, useRef, useState } from 'react'
-import { simulate } from '../lib/api'
+import { baselinePeak, simulate } from '../lib/api'
 import type { SimResponse } from '../types'
 
-/** Debounced, abortable call to POST /api/simulate while the slider is dragged. */
 export function useScenario(lakeId: string, deltaC: number, years: number, debounceMs = 180) {
   const [data, setData] = useState<SimResponse | null>(null)
+  const [baseQ, setBaseQ] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const ctl = useRef<AbortController | null>(null)
 
   useEffect(() => {
+    if (!lakeId) return
     const id = setTimeout(async () => {
       ctl.current?.abort(); ctl.current = new AbortController()
       setLoading(true)
-      try { setData(await simulate(lakeId, deltaC, years, ctl.current.signal)); setError(null) }
-      catch (e) { if ((e as Error).name !== 'AbortError') setError('Backend unreachable: showing heuristic scaling') }
+      try {
+        const [s, b] = await Promise.all([simulate(lakeId, deltaC, years, ctl.current.signal), baselinePeak(lakeId, years)])
+        setData(s); setBaseQ(b); setError(null)
+      }
+      catch (e) { if ((e as Error).name !== 'AbortError') setError('Backend unreachable, so the flood outline is only roughly scaled.') }
       finally { setLoading(false) }
     }, debounceMs)
     return () => clearTimeout(id)
   }, [lakeId, deltaC, years, debounceMs])
 
-  return { data, loading, error }
+  return { data, baseQ, loading, error }
 }
 
-/** Exponentially smooth a number toward `target` (for animated polygon scaling). */
 export function useSmooth(target: number, rate = 7) {
   const [v, setV] = useState(target)
   const cur = useRef(target)

@@ -1,8 +1,8 @@
-import type { ExposureFeature, FloodFeature, LakeCollection, SimResponse } from '../types'
+import type { ExposureFeature, ExposureResponse, FloodFeature, LakeCollection, MetaResponse, SimResponse, TrendsResponse } from '../types'
 import { demoExposure, demoFloods, demoLakes } from './demoData'
 import { smoothPolygon } from './geo'
 
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
+export const API = import.meta.env.VITE_API_URL ?? 'http://localhost:8000'
 
 async function tryJson<T>(url: string | undefined, fallback: () => T, pick: (j: any) => T): Promise<T> {
   if (!url) return fallback()
@@ -68,9 +68,21 @@ function normalizeExposure(j: any): ExposureFeature[] {
   return out
 }
 
-export const loadLakes = (): Promise<LakeCollection> => tryJson(import.meta.env.VITE_LAKES_URL, demoLakes, normalizeLakes)
-export const loadFloods = (): Promise<FloodFeature[]> => tryJson(import.meta.env.VITE_FLOOD_URL, demoFloods, normalizeFloods)
-export const loadExposure = (): Promise<ExposureFeature[]> => tryJson(import.meta.env.VITE_EXPOSURE_URL, demoExposure, normalizeExposure)
+export const loadLakes = (): Promise<LakeCollection> => tryJson(import.meta.env.VITE_LAKES_URL ?? '/data/lakes_master.geojson', demoLakes, normalizeLakes)
+export const loadFloods = (): Promise<FloodFeature[]> => tryJson(import.meta.env.VITE_FLOOD_URL ?? '/data/flood_zones.geojson', demoFloods, normalizeFloods)
+export const loadExposure = (): Promise<ExposureFeature[]> => tryJson(import.meta.env.VITE_EXPOSURE_URL ?? '/data/flood_zones.geojson', demoExposure, normalizeExposure)
+
+async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
+  let r: Response
+  try { r = await fetch(`${API}${path}`, { signal }) }
+  catch (e) { if ((e as Error).name === 'AbortError') throw e; throw new Error(`Could not reach the API at ${API}`) }
+  if (!r.ok) throw new Error(`${path} returned ${r.status}`)
+  return r.json()
+}
+
+export const getTrends = (lakeId: string, signal?: AbortSignal) => getJson<TrendsResponse>(`/api/lakes/${lakeId}/trends`, signal)
+export const getExposure = (lakeId: string, signal?: AbortSignal) => getJson<ExposureResponse>(`/api/lakes/${lakeId}/exposure`, signal)
+export const getMeta = () => getJson<MetaResponse>('/api/meta')
 
 export async function simulate(lake_id: string, temp_delta_c: number, scenario_years: number, signal?: AbortSignal): Promise<SimResponse> {
   const r = await fetch(`${API}/api/simulate`, {
@@ -81,3 +93,14 @@ export async function simulate(lake_id: string, temp_delta_c: number, scenario_y
   return r.json()
 }
 
+const baseCache = new Map<string, Promise<number>>()
+export function baselinePeak(lake_id: string, years: number): Promise<number> {
+  const key = `${lake_id}:${years}`
+  let p = baseCache.get(key)
+  if (!p) {
+    p = simulate(lake_id, 0, years).then(s => s.peak_discharge_m3s)
+    p.catch(() => baseCache.delete(key))
+    baseCache.set(key, p)
+  }
+  return p
+}
