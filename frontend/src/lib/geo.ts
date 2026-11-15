@@ -68,7 +68,7 @@ export function bufferLine(line: Position[], halfW: number[]): Polygon {
   return { type: 'Polygon', coordinates: [[...ring, ring[0]]] }
 }
 
-/** Douglas-Peucker: drop vertices closer than `tol` degrees (~0.0001 ≈ 11 m) to the simplified line. */
+/** Douglas-Peucker: drop vertices closer than `tol` degrees (~0.0001 ≈ 11 m). */
 function dp(pts: Position[], tol: number): Position[] {
   if (pts.length < 3) return pts
   const [a, b] = [pts[0], pts[pts.length - 1]]
