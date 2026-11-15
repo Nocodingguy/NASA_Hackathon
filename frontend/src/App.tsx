@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { MapRef } from 'react-map-gl/mapbox'
-import type { Feature, FeatureCollection, Polygon, Position } from 'geojson'
+import type { Feature, Polygon, Position } from 'geojson'
 import MapView from './components/MapView'
 import Scrubber from './components/Scrubber'
 import ActionCard from './components/ActionCard'
@@ -25,18 +25,6 @@ const RATIO_FULL = 2.6
 const RATIO_START = 0.9
 const BASE_HALF_WIDTH_M = 90
 const WIDEN_M_PER_KM = 7
-// Breach tiers, outermost first. `reach` follows Member 1's reach factors; `width` is a visual choice.
-const TIERS = [
-  { tier: 'severe', reach: 1.0, width: 1.0 },
-  { tier: 'moderate', reach: 0.75, width: 0.6 },
-  { tier: 'low', reach: 0.5, width: 0.35 },
-] as const
-
-const TIER_LEGEND = [
-  ['#3b82f6', 'Tier 1 · Low breach'],
-  ['#f59e0b', 'Tier 2 · Moderate breach'],
-  ['#ef4444', 'Tier 3 · Catastrophic collapse'],
-] as const
 
 function reachFraction(ratio: number): number {
   const f = Math.min(1, Math.max(0, (ratio - RATIO_START) / (RATIO_FULL - RATIO_START)))
@@ -142,17 +130,13 @@ export default function App() {
 
   const reachKm = river ? river.total * reachFraction(ratio) : 0
 
-  // Three nested breach bands along the river; all grow with the warming sliders.
-  const flood = useMemo<FeatureCollection<Polygon, { tier: string }> | null>(() => {
+  const flood = useMemo<Feature<Polygon> | null>(() => {
     if (!river) return null
+    const { pts, km } = sliceLine(river.line, river.cum, reachKm)
+    if (pts.length < 2) return null
     const widthScale = Math.pow(ratio, 0.6)
-    const features = TIERS.flatMap(t => {
-      const { pts, km } = sliceLine(river.line, river.cum, reachKm * t.reach)
-      if (pts.length < 2) return []
-      const halfW = km.map(k => (BASE_HALF_WIDTH_M + WIDEN_M_PER_KM * k) * widthScale * t.width)
-      return [{ type: 'Feature' as const, properties: { tier: t.tier }, geometry: bufferLine(pts, halfW) }]
-    })
-    return features.length ? { type: 'FeatureCollection' as const, features } : null
+    const halfW = km.map(k => (BASE_HALF_WIDTH_M + WIDEN_M_PER_KM * k) * widthScale)
+    return { type: 'Feature', properties: { ratio }, geometry: bufferLine(pts, halfW) }
   }, [river, reachKm, ratio])
 
   const scenarioLake = useMemo<Feature<Polygon> | null>(() => {
@@ -223,13 +207,6 @@ export default function App() {
             exposedCount={exposureState.filter(e => e.exposed).length}
             etaRows={dynamicEtaRows} />
           <Scrubber t={tl.t} min={yMin} max={yMax} playing={tl.playing} areaKm2={areaKm2} onChange={tl.setT} onToggle={tl.toggle} />
-
-          <div className="panel absolute bottom-4 left-4 p-3 text-xs max-sm:hidden">
-            <div className="mb-1 font-semibold">Breach scenario</div>
-            {TIER_LEGEND.map(([c, l]) => (
-              <div key={l} className="flex items-center gap-2"><span className="h-3 w-3 rounded-sm" style={{ background: c }} />{l}</div>
-            ))}
-          </div>
         </>
       )}
 
