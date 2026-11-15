@@ -7,12 +7,12 @@
       "latest_satellite_pass": "2026-11-12 04:50 UTC",
       "satellite": "sentinel-2-l2a",
       "cloud_cover_pct": 11.9,
-      "current_area_km2": 16.49,
-      "baseline_area_km2": 1.54,
-      "delta_from_baseline_pct": 970.8,
+      "current_area_km2": 11.921,
+      "baseline_area_km2": 1.63,
+      "delta_from_baseline_pct": 631.3,
       "risk_level": "CRITICAL_SWELL",
-      "official_directive": "Initiate siphon pump discharge; put downstream Tamakoshi corridor on high alert.",
-      "last_checked": "2026-11-15T08:00:22.922211"
+      "official_directive": "Initiate siphon pump discharge; put downstream valley corridor on high alert.",
+      "last_checked": "2026-11-15T08:10:51.129453"
     },
     {
       "lake_id": "imja_tsho",
@@ -21,13 +21,27 @@
       "latest_satellite_pass": "2026-11-12 04:50 UTC",
       "satellite": "sentinel-2-l2a",
       "cloud_cover_pct": 11.9,
-      "current_area_km2": 11.353,
-      "baseline_area_km2": 1.45,
-      "delta_from_baseline_pct": 683.0,
+      "current_area_km2": 4.959,
+      "baseline_area_km2": 1.55,
+      "delta_from_baseline_pct": 219.9,
       "risk_level": "CRITICAL_SWELL",
-      "official_directive": "Initiate siphon pump discharge; put downstream Tamakoshi corridor on high alert.",
-      "last_checked": "2026-11-15T08:00:33.261108"
+      "official_directive": "Initiate siphon pump discharge; put downstream valley corridor on high alert.",
+      "last_checked": "2026-11-15T08:10:58.620945"
+    },
+    {
+      "lake_id": "thulagi_lake",
+      "lake_name": "Thulagi Lake",
+      "status": "ONLINE",
+      "latest_satellite_pass": "2026-11-12 05:02 UTC",
+      "satellite": "sentinel-2-l2a",
+      "cloud_cover_pct": 13.6,
+      "current_area_km2": 1.899,
+      "baseline_area_km2": 0.88,
+      "delta_from_baseline_pct": 115.8,
+      "risk_level": "CRITICAL_SWELL",
+      "official_directive": "Initiate siphon pump discharge; put downstream valley corridor on high alert.",
+      "last_checked": "2026-11-15T08:11:01.173274"
     }
   ],
-  "generated_at": "2026-11-15T08:00:40.252671"
+  "generated_at": "2026-11-15T08:11:12.242460"
 }
